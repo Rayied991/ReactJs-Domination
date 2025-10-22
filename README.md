@@ -1,4 +1,4 @@
-# ⚛️ ReactJS Domination
+# ⚛️ ReactJS + Vite Notes
 
 ---
 
@@ -46,6 +46,7 @@ Reloading made the experience **slow** and **inefficient**.
    ```
 
 3. Run the development server:
+
    ```bash
    npm run dev
    ```
@@ -194,19 +195,152 @@ src/
 
 ---
 
-## 🗂️ Summary
+## 🧭 Props in React
 
-| Concept           | Description                                |
-| ----------------- | ------------------------------------------ |
-| ReactJS           | JS library for building UI (by Meta, 2013) |
-| Component-Based   | Each UI part is a reusable component       |
-| Virtual DOM       | Faster, only updates changed parts         |
-| JSX               | Mix of HTML + JavaScript                   |
-| `npm create vite` | Creates a new Vite project                 |
-| `npm run dev`     | Runs development server                    |
-| `rafce`           | React Arrow Function Component shortcut    |
-| Fragments         | Used to return multiple elements           |
-| ESLint            | Helps write cleaner code                   |
-| Components Folder | Store small, reusable features             |
+### 💬 What are Props?
+
+- **Props** (short for _properties_) are used to **pass data from one component to another**.
+- They make components **reusable and dynamic**.
+- Data flow in React is **one-directional** (from **parent → child**).
 
 ---
+
+### ⚙️ Props Drilling
+
+- **Props drilling** means passing data **from parent to child**, and sometimes **through multiple layers** of components.
+
+Example:
+
+```
+App → Card → Image
+```
+
+- Data can **flow downward (parent → child)**.
+- Data **cannot** flow **upward (child → parent)**.
+
+---
+
+### 🧩 Example: Passing Props
+
+#### 📁 App.jsx (Parent)
+
+```jsx
+import Card from "./components/Card";
+
+function App() {
+  return (
+    <div className="parent">
+      <Card
+        user="Rayied"
+        age={25}
+        image="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=1470"
+      />
+      <Card
+        user="Aman"
+        age={18}
+        image="https://images.unsplash.com/photo-1625786682948-2168238883d2?auto=format&fit=crop&q=80&w=687"
+      />
+      <Card
+        user="Sarthak"
+        age={21}
+        image="https://plus.unsplash.com/premium_photo-1669635062493-cd4806e9b5d6?auto=format&fit=crop&q=80&w=687"
+      />
+    </div>
+  );
+}
+
+export default App;
+```
+
+---
+
+#### 📁 Card.jsx (Child)
+
+```jsx
+const Card = (props) => {
+  console.log(props); // Logs the entire props object
+  console.log(props.user); // Logs individual values
+
+  return (
+    <div className="card">
+      <img src={props.image} alt={props.user} />
+      <h1>
+        {props.user} : {props.age}
+      </h1>
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+      <button>View Profile</button>
+    </div>
+  );
+};
+
+export default Card;
+```
+
+---
+
+### 🧩 Props as Objects
+
+- In React, all props are received as a **single object**.
+- You can access each value using `props.propertyName`.
+
+Example:
+
+```jsx
+function Welcome(props) {
+  return <h1>Hello, {props.name}!</h1>;
+}
+```
+
+---
+
+### 🪄 Destructuring Props (Cleaner Code)
+
+Instead of `props.user` or `props.age`, you can destructure them:
+
+```jsx
+const Card = ({ user, age, image }) => {
+  return (
+    <div className="card">
+      <img src={image} alt={user} />
+      <h1>
+        {user} : {age}
+      </h1>
+      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit.</p>
+      <button>View Profile</button>
+    </div>
+  );
+};
+```
+
+---
+
+### 🧱 Data Flow Summary
+
+| Direction         | Description                                          |
+| ----------------- | ---------------------------------------------------- |
+| ⬇️ Parent → Child | Data passed via props                                |
+| ⬆️ Child → Parent | Not possible directly (use state lifting or context) |
+
+---
+
+## 🗂️ Summary Table
+
+| Concept           | Description                                   |
+| ----------------- | --------------------------------------------- |
+| ReactJS           | JS library for building UI (by Meta, 2013)    |
+| Component-Based   | Each UI part is a reusable component          |
+| Virtual DOM       | Faster, only updates changed parts            |
+| JSX               | Mix of HTML + JavaScript                      |
+| `npm create vite` | Creates a new Vite project                    |
+| `npm run dev`     | Runs development server                       |
+| `rafce`           | React Arrow Function Component shortcut       |
+| Fragments         | Used to return multiple elements              |
+| ESLint            | Helps write cleaner code                      |
+| Components Folder | Store small, reusable features                |
+| Props             | Pass data from parent to child components     |
+| Props Drilling    | Data passed through multiple component levels |
+
+---
+
+✅ **Key Takeaway:**  
+React’s **component-based** and **one-way data flow** structure makes it efficient, reusable, and scalable for modern UI development.

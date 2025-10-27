@@ -191,3 +191,89 @@ export default Card;
 | ESLint            | Cleaner code                      |
 
 ---
+
+---
+
+## 🎨 CSS Modules & Folder Structure
+
+### 💡 What Are CSS Modules?
+
+CSS Modules provide **scoped styling**, ensuring styles apply only to specific components.  
+They prevent class name conflicts and improve maintainability.
+
+Example:
+
+```jsx
+import styles from "./Card.module.css";
+
+function Card({ company, post }) {
+  return (
+    <div className={styles.card}>
+      <h2>{company}</h2>
+      <p>{post}</p>
+    </div>
+  );
+}
+```
+
+---
+
+### 🗂️ Folder Structure
+
+```
+src/
+ ├── components/
+ │   ├── Card/
+ │   │   ├── Card.jsx
+ │   │   └── Card.module.css
+ │   ├── Navbar/
+ │   │   ├── Navbar.jsx
+ │   │   └── Navbar.module.css
+ ├── App.jsx
+ ├── main.jsx
+ └── index.css
+```
+
+---
+
+### 🚀 Why Use This Structure?
+
+| Benefit           | Description                          |
+| ----------------- | ------------------------------------ |
+| 🎯 Scoped Styling | Styles apply only to their component |
+| 🧩 Modular Code   | Easier to reuse and maintain         |
+| ⚡ Clean Imports  | Each component manages its own CSS   |
+| 🧠 Scalability    | Ideal for large projects             |
+| 💬 No Conflicts   | Avoids global style overlap          |
+
+---
+
+## 🎨 Why Use Tailwind CSS Over Normal CSS
+
+| Feature            | Tailwind CSS                        | Normal CSS                       |
+| ------------------ | ----------------------------------- | -------------------------------- |
+| ⚡ Speed           | Apply styles directly in JSX        | Requires switching between files |
+| 🧩 Reusability     | Utility classes reduce duplication  | Repeated CSS rules               |
+| 🎨 Consistency     | Predefined spacing, colors, fonts   | Manual consistency needed        |
+| 🧠 Maintainability | Refactoring is easy                 | Needs global edits               |
+| 📱 Responsive      | Built-in responsive classes         | Manual media queries             |
+| 🧵 File Size       | Removes unused styles automatically | Can grow large                   |
+
+✅ **Tailwind** = Faster, cleaner, and more scalable for modern React UIs.
+
+---
+
+## 🧠 When to Use Tailwind vs CSS Modules
+
+| Use Case                 | Recommended Option |
+| ------------------------ | ------------------ |
+| Small / Medium Projects  | **Tailwind CSS**   |
+| Large or Enterprise Apps | **CSS Modules**    |
+| Component Libraries      | **CSS Modules**    |
+| Prototyping              | **Tailwind CSS**   |
+| Custom UI System         | **Both Together**  |
+
+---
+
+✅ **Key Takeaway:**  
+Use **CSS Modules** for structure & maintainability, and **Tailwind CSS** for rapid, utility-based design.

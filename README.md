@@ -387,4 +387,108 @@ src/
 - **Feature-Based** → Best for **applications** focusing on logic and functionality.
 - **Atomic Design** → Best for **component libraries** and **UI consistency**.
 - Many modern React setups **combine both approaches**, using atomic design **inside each feature** for balance and scalability.
+  npm install remixicon --save
+  npm i lucide-react
+
+---
+
+## 🧠 Using Functions & Events in React
+
+### ✅ Best Practices
+
+- Define functions **outside JSX** to avoid re-creation on each render.
+- Use **arrow functions** for concise syntax.
+- Always **pass functions to events**, not call them immediately (no `()` unless intentional).
+
+### Example: Click & Input Events
+
+```jsx
+const App = () => {
+  const handleClick = () => console.log("Button clicked");
+  const handleInput = (val) => console.log(val);
+
+  return (
+    <div>
+      <button onClick={handleClick}>Click Me</button>
+      <input
+        onChange={(e) => handleInput(e.target.value)}
+        placeholder="Type..."
+      />
+    </div>
+  );
+};
+
+export default App;
+```
+
+### Example: Scroll Event
+
+```jsx
+const App = () => {
+  const handleScroll = (delta) => {
+    if (delta > 0) console.log("Scrolling down");
+    else console.log("Scrolling up");
+  };
+
+  return (
+    <div onWheel={(e) => handleScroll(e.deltaY)}>
+      <div className="page1"></div>
+      <div className="page2"></div>
+      <div className="page3"></div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+---
+
+### ❌ How NOT to Use Functions
+
+1. **Do not define heavy functions inside JSX**:
+
+```jsx
+// ❌ Bad
+return (
+  <button
+    onClick={() => {
+      console.log("Button clicked");
+      // complex logic here – recreated on every render
+    }}
+  >
+    Click Me
+  </button>
+);
+```
+
+2. **Do not call functions immediately on events unless intentional**:
+
+```jsx
+// ❌ Bad
+<button onClick={handleClick()}>Click Me</button> // calls immediately on render
+```
+
+3. **Avoid anonymous functions for repeated or heavy operations**  
+   They create new function instances each render, affecting performance for large or frequently updated components.
+
+---
+
+### 💡 Tips
+
+- Always **pass the function reference** to event handlers.
+- Use **parameters with arrow functions** when needed:
+
+```jsx
+<button onClick={() => handleClick("Hello")}>Click Me</button>
+```
+
+- For performance-critical components, consider **memoization** (`useCallback`) for handler functions.
+
+---
+
+✅ **Key Takeaway:**
+
+- Functions in React should be **readable, reusable, and efficient**.
+- Correct usage ensures **better performance, maintainability, and clarity** in your components.
 

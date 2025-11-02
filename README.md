@@ -843,5 +843,90 @@ const [formData, setFormData] = useState({ name: "", email: "" });
 setFormData((prev) => ({ ...prev, name: e.target.value }));
 ```
 
+# 🔄 React Two-Way Binding Cheat Sheet
 
+## 1. Two-Way Binding in React
+
+Two-way binding allows input fields to **update state** and reflect state changes in the input. This is essential for controlled forms.
+
+```jsx
+import { useState } from "react";
+
+const App = () => {
+  const [title, setTitle] = useState("");
+
+  const submitHandler = (e) => {
+    e.preventDefault(); // prevents page reload
+    console.log("Form Submitted:", title);
+  };
+
+  return (
+    <form onSubmit={submitHandler}>
+      <input
+        type="text"
+        value={title}
+        onChange={(e) => setTitle(e.target.value)}
+        placeholder="Enter your Name"
+      />
+      <button>Submit</button>
+    </form>
+  );
+};
+```
+
+**Key Points:**
+
+- `value={title}` → input reflects the current state
+- `onChange` → updates state when user types
+- Prevents default form submission with `e.preventDefault()`
+- Useful for **live validation** and **controlled components**
+
+---
+
+## 2. How It Works (Diagram)
+
+```mermaid
+flowchart LR
+    UserInput -->|types text| UpdateState[React useState]
+    UpdateState -->|state changes| InputField[Input value updates]
+    InputField -->|reflects changes| UserInput
+```
+
+**Explanation:**
+
+1. User types into the input field.
+2. `onChange` handler updates the state.
+3. State change automatically updates the input value.
+4. The loop continues, maintaining synchronization.
+
+---
+
+## 3. Multiple Inputs with Single State Object
+
+```jsx
+const [formData, setFormData] = useState({ name: '', email: '' });
+
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData(prev => ({ ...prev, [name]: value }));
+};
+
+<input name="name" value={formData.name} onChange={handleChange} />
+<input name="email" value={formData.email} onChange={handleChange} />
+```
+
+- Allows multiple input fields to be managed with a **single state object**.
+- Keeps the form organized and scalable.
+
+---
+
+## 4. Quick Tips
+
+- Always use `e.preventDefault()` in form submissions.
+- Controlled components are **reactive**, making it easier to validate or manipulate input.
+- Two-way binding is essential for features like:
+  - Live form validation
+  - Conditional input formatting
+  - Pre-filling forms with existing data
+- Combine with **custom hooks** for reusable form logic.
 

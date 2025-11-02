@@ -492,6 +492,37 @@ return (
 - Functions in React should be **readable, reusable, and efficient**.
 - Correct usage ensures **better performance, maintainability, and clarity** in your components.
 
+<!-- ## Hooks -->
+
+<!-- usestate-> manages states
+useeffect-> sideeffect manages[without disturbing main,manage side]
+mainfunction+api call and fetch data(sideeffect/process)
+useref:
+mutable values hold which doesnt trigger re-render
+in js->doc.getelementbyid("abc");
+i want to change a variable
+directly change [not efficient]
+ask react to change and return change[usestate]
+to select a dom element using useref.
+
+usecontext:
+global context manages
+
+app->Sect1>-sect2:
+directly cannto send app to sect1.
+make data global using context api anyone can access from anywhere.
+usereducer: complex global state manages
+[1.basic state manage:usestate
+2.global state manage:usecontext
+complex global state manages:usereducer]
+usememo: for optimization
+memoization
+usecallback: for optimization
+usememo,usecallback: for optimization, unnecessary re-renders avoid.
+-->
+
+<!-- usestate:
+batch update: -->
 
 # 🪝 React Hooks Complete Cheatsheet
 
@@ -717,4 +748,100 @@ flowchart LR
 - Always clean up side-effects in `useEffect`.
 - Use functional updates to prevent stale closures in `useState`.
 - Optimize expensive calculations with `useMemo` and functions with `useCallback`.
+
+# 📝 React Form Handling Cheat Sheet
+
+## 1. Basic Form Handling
+
+By default, submitting a form reloads the page. Example:
+
+```jsx
+const App = () => {
+  const submitHandler = () => {
+    console.log("Form submitted");
+  };
+
+  return (
+    <form onSubmit={submitHandler}>
+      <input type="text" placeholder="Enter your Name" />
+      <button>Submit</button>
+    </form>
+  );
+};
+```
+
+- Issue: Page reloads immediately after submit, so `console.log` is visible only for a moment.
+
+---
+
+## 2. Prevent Default Behavior
+
+Use `e.preventDefault()` to stop page reload.
+
+```jsx
+const App = () => {
+  const submitHandler = (e) => {
+    e.preventDefault();
+    console.log("Form submitted");
+  };
+
+  return (
+    <form onSubmit={submitHandler}>
+      <input type="text" placeholder="Enter your Name" />
+      <button>Submit</button>
+    </form>
+  );
+};
+```
+
+- Now the page **does not reload** and you can see console logs clearly.
+
+---
+
+## 3. Controlled Components
+
+Keep form inputs in state for React-controlled forms.
+
+```jsx
+import { useState } from "react";
+
+const App = () => {
+  const [name, setName] = useState("");
+
+  const submitHandler = (e) => {
+    e.preventDefault();
+    console.log(name);
+  };
+
+  return (
+    <form onSubmit={submitHandler}>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Enter your Name"
+      />
+      <button>Submit</button>
+    </form>
+  );
+};
+```
+
+- Advantage: Easy to access form values.
+- Can combine multiple inputs in one state object.
+
+---
+
+## 4. Quick Tips
+
+- Always use `e.preventDefault()` in React forms.
+- Controlled inputs are preferred for dynamic validation or state-dependent behavior.
+- For multiple inputs, use a single state object:
+
+```jsx
+const [formData, setFormData] = useState({ name: "", email: "" });
+setFormData((prev) => ({ ...prev, name: e.target.value }));
+```
+
+
 

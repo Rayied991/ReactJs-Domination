@@ -492,3 +492,260 @@ return (
 - Functions in React should be **readable, reusable, and efficient**.
 - Correct usage ensures **better performance, maintainability, and clarity** in your components.
 
+<!-- ## Hooks -->
+
+<!-- usestate-> manages states
+useeffect-> sideeffect manages[without disturbing main,manage side]
+mainfunction+api call and fetch data(sideeffect/process)
+useref:
+mutable values hold which doesnt trigger re-render
+in js->doc.getelementbyid("abc");
+i want to change a variable
+directly change [not efficient]
+ask react to change and return change[usestate]
+to select a dom element using useref.
+
+usecontext:
+global context manages
+
+app->Sect1>-sect2:
+directly cannto send app to sect1.
+make data global using context api anyone can access from anywhere.
+usereducer: complex global state manages
+[1.basic state manage:usestate
+2.global state manage:usecontext
+complex global state manages:usereducer]
+usememo: for optimization
+memoization
+usecallback: for optimization
+usememo,usecallback: for optimization, unnecessary re-renders avoid.
+-->
+
+<!-- usestate:
+batch update: -->
+
+# 🪝 React Hooks Complete Cheatsheet
+
+```mermaid
+flowchart TD
+    A[Component Mounts] --> B[useState]
+    A --> C[useEffect]
+    B --> D[Re-render Component]
+    D --> C
+    D --> E[useRef]
+    F[Global Context] --> G[useContext]
+    H[Complex State] --> I[useReducer]
+    J[Optimization] --> K[useMemo / useCallback]
+```
+
+---
+
+## 1. `useState` – Local State
+
+Manages local state inside a component. Each state update triggers a re-render.
+
+```jsx
+import { useState } from "react";
+
+const App = () => {
+  const [num, setNum] = useState(0);
+  const [userName, setUserName] = useState("Sarthak");
+
+  const increment = () => setNum((prev) => prev + 1);
+  const decrement = () => setNum((prev) => prev - 1);
+  const changeName = () => setUserName("Rayied");
+
+  return (
+    <div>
+      <h1>Name: {userName}</h1>
+      <h1>Value: {num}</h1>
+      <button onClick={increment}>Increase</button>
+      <button onClick={decrement}>Decrease</button>
+      <button onClick={changeName}>Change Name</button>
+    </div>
+  );
+};
+```
+
+**Tips:**
+
+- Functional updates ensure correct value when multiple state updates occur.
+- State should be immutable; don't modify objects or arrays directly.
+
+---
+
+## 2. Batch Updates
+
+React can batch multiple state updates into a single render for performance.
+
+```jsx
+const [batchUpdate, setBatchUpdate] = useState(10);
+
+const up = () => {
+  setBatchUpdate((prev) => prev + 1);
+  setBatchUpdate((prev) => prev + 1);
+  setBatchUpdate((prev) => prev + 1); // increments by 3
+};
+```
+
+**Note:** Using previous state inside the updater function is essential for batch increments.
+
+---
+
+## 3. Updating Objects & Arrays
+
+Always create a new copy of the state to avoid mutations.
+
+```jsx
+// Object update
+setUser((prev) => ({ ...prev, age: 50 }));
+
+// Array update
+setNumbers((prev) => [...prev, 97]);
+```
+
+- Spread operator (`...`) creates a shallow copy.
+- Functional updates prevent stale closures.
+
+---
+
+## 4. `useEffect` – Side Effects
+
+Used for API calls, subscriptions, DOM updates, timers.
+
+```jsx
+import { useEffect } from "react";
+
+useEffect(() => {
+  console.log("Component mounted or num changed", num);
+  return () => console.log("Cleanup before next effect or unmount");
+}, [num]);
+```
+
+- Empty array `[]` → runs only on mount.
+- No dependency array → runs on every render.
+- Return a function to handle cleanup.
+
+---
+
+## 5. `useRef` – Mutable Values / DOM Access
+
+Keeps a value that persists across renders without triggering re-render.
+
+```jsx
+import { useRef } from "react";
+
+const inputRef = useRef(null);
+<input ref={inputRef} />;
+
+// Focus input
+inputRef.current.focus();
+```
+
+- Useful for accessing DOM elements, storing timers, or mutable variables.
+
+---
+
+## 6. `useContext` – Global State
+
+Provides a way to share state across components without prop drilling.
+
+```jsx
+import { createContext, useContext } from "react";
+
+const MyContext = createContext();
+
+<MyContext.Provider value={{ user: "Rayied", theme: "dark" }}>
+  <Child />
+</MyContext.Provider>;
+
+const Child = () => {
+  const value = useContext(MyContext);
+  return (
+    <p>
+      User: {value.user}, Theme: {value.theme}
+    </p>
+  );
+};
+```
+
+- Works with Provider/Consumer pattern.
+- Can be combined with `useReducer` for complex global state.
+
+---
+
+## 7. `useReducer` – Complex State
+
+Good for managing multiple related state values or complex logic.
+
+```jsx
+const reducer = (state, action) => {
+  switch (action.type) {
+    case "increment":
+      return { ...state, count: state.count + 1 };
+    case "decrement":
+      return { ...state, count: state.count - 1 };
+    default:
+      return state;
+  }
+};
+
+const [state, dispatch] = useReducer(reducer, { count: 0 });
+<button onClick={() => dispatch({ type: "increment" })}>Add</button>;
+```
+
+- State is immutable and managed through dispatch actions.
+- Makes logic predictable and testable.
+
+---
+
+## 8. `useMemo` & `useCallback` – Optimization
+
+Avoid expensive recalculations and unnecessary function re-creations.
+
+```jsx
+import { useMemo, useCallback } from "react";
+
+const memoValue = useMemo(() => computeExpensive(num), [num]);
+const memoFunc = useCallback(() => doSomething(num), [num]);
+```
+
+- `useMemo` caches the result of a computation.
+- `useCallback` caches the function reference.
+- Reduces unnecessary re-renders in child components.
+
+---
+
+## 🔹 Hook Usage Flow
+
+```mermaid
+flowchart LR
+    useState --> useEffect
+    useEffect --> useRef
+    useContext --> useReducer
+    useMemo --> useCallback
+```
+
+---
+
+## ✅ Summary Table
+
+| Hook          | Purpose              | Short Example                            |
+| ------------- | -------------------- | ---------------------------------------- |
+| `useState`    | Local state          | `[num,setNum]=useState(0)`               |
+| `useEffect`   | Side effects         | `useEffect(()=>{},[dep])`                |
+| `useRef`      | Mutable value / DOM  | `const ref=useRef()`                     |
+| `useContext`  | Global state         | `const val=useContext(MyContext)`        |
+| `useReducer`  | Complex state        | `[state,dispatch]=useReducer(reducer,0)` |
+| `useMemo`     | Memoize calculations | `useMemo(()=>expensive(),[dep])`         |
+| `useCallback` | Memoize functions    | `useCallback(()=>fn(),[dep])`            |
+
+---
+
+**Additional Tips:**
+
+- Combine hooks (e.g., `useReducer` + `useContext`) for global complex state.
+- Always clean up side-effects in `useEffect`.
+- Use functional updates to prevent stale closures in `useState`.
+- Optimize expensive calculations with `useMemo` and functions with `useCallback`.
+

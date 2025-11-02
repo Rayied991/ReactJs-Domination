@@ -492,37 +492,6 @@ return (
 - Functions in React should be **readable, reusable, and efficient**.
 - Correct usage ensures **better performance, maintainability, and clarity** in your components.
 
-<!-- ## Hooks -->
-
-<!-- usestate-> manages states
-useeffect-> sideeffect manages[without disturbing main,manage side]
-mainfunction+api call and fetch data(sideeffect/process)
-useref:
-mutable values hold which doesnt trigger re-render
-in js->doc.getelementbyid("abc");
-i want to change a variable
-directly change [not efficient]
-ask react to change and return change[usestate]
-to select a dom element using useref.
-
-usecontext:
-global context manages
-
-app->Sect1>-sect2:
-directly cannto send app to sect1.
-make data global using context api anyone can access from anywhere.
-usereducer: complex global state manages
-[1.basic state manage:usestate
-2.global state manage:usecontext
-complex global state manages:usereducer]
-usememo: for optimization
-memoization
-usecallback: for optimization
-usememo,usecallback: for optimization, unnecessary re-renders avoid.
--->
-
-<!-- usestate:
-batch update: -->
 
 # 🪝 React Hooks Complete Cheatsheet
 

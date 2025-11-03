@@ -930,3 +930,180 @@ const handleChange = (e) => {
   - Pre-filling forms with existing data
 - Combine with **custom hooks** for reusable form logic.
 
+# 💾 sessionStorage vs localStorage in JavaScript
+
+## 1. Overview
+
+Both **localStorage** and **sessionStorage** are part of the **Web Storage API**, allowing developers to store data in the browser in a key-value pair format. Unlike cookies, this data is **not sent to the server** with each HTTP request.
+
+| Feature              | localStorage                                        | sessionStorage                                  |
+| -------------------- | --------------------------------------------------- | ----------------------------------------------- |
+| **Scope**            | Persistent storage across browser sessions          | Temporary storage for the active tab/session    |
+| **Data Persistence** | Remains until explicitly deleted                    | Cleared when the tab or browser is closed       |
+| **Storage Limit**    | Around 5–10 MB                                      | Around 5 MB                                     |
+| **Accessibility**    | Available across all tabs with the same origin      | Available only within the same browser tab      |
+| **Use Case**         | Long-term preferences, tokens, theme, user data     | Temporary data, forms, or one-time session info |
+| **API Methods**      | `setItem()`, `getItem()`, `removeItem()`, `clear()` | Same methods as localStorage                    |
+
+---
+
+## 2. 🗂️ localStorage Example
+
+```jsx
+const App = () => {
+  // ✅ Store a simple value
+  localStorage.setItem("age", 25);
+
+  // ✅ Retrieve it
+  const age = localStorage.getItem("age");
+  console.log(age); // 25
+
+  // ✅ Remove a specific item
+  localStorage.removeItem("age");
+
+  // ✅ Store complex data (object)
+  const user = { username: "Rayied", age: 25, city: "Gazipur" };
+  localStorage.setItem("user", JSON.stringify(user));
+
+  // ✅ Retrieve and parse it back
+  const data = JSON.parse(localStorage.getItem("user"));
+  console.log(data.username); // Rayied
+
+  return <div>App</div>;
+};
+```
+
+### 🔍 Notes:
+
+- Data **remains after closing the browser**.
+- Always use `JSON.stringify()` when storing objects.
+- Use `JSON.parse()` to read structured data.
+- Data is domain-specific; one domain cannot access another domain's storage.
+
+---
+
+## 3. 🕒 sessionStorage Example
+
+```jsx
+// Store temporary data during the session
+sessionStorage.setItem("theme", "dark");
+
+// Retrieve it
+const theme = sessionStorage.getItem("theme");
+console.log(theme); // dark
+
+// Remove item
+sessionStorage.removeItem("theme");
+
+// Clear all session data
+sessionStorage.clear();
+```
+
+### 🧠 Notes:
+
+- Data disappears once you close the tab or browser.
+- Each browser tab has its own separate sessionStorage.
+- Works best for short-term data like a form-in-progress or temporary session tokens.
+
+---
+
+## 4. 🧩 Key Differences Summary
+
+| Criteria          | localStorage                          | sessionStorage                    |
+| ----------------- | ------------------------------------- | --------------------------------- |
+| **Lifetime**      | Persistent                            | Ends with session/tab             |
+| **Access Scope**  | Shared between all tabs (same origin) | Isolated per tab                  |
+| **Storage Limit** | Higher (5–10 MB)                      | Slightly smaller (~5 MB)          |
+| **Use Case**      | Remember user settings, theme, tokens | Temporary form data, user session |
+| **Clearing Data** | Manual (`removeItem`, `clear`)        | Automatic on session end          |
+
+---
+
+## 5. 🚀 Practical Use Cases
+
+### ✅ Use localStorage for:
+
+- Saving dark/light mode preferences
+- Caching API responses for offline access
+- Storing JWT authentication tokens
+- Keeping user language settings
+
+### ⚡ Use sessionStorage for:
+
+- Form data between navigation steps
+- Temporary shopping cart for guest checkout
+- Keeping a flag for an ongoing session process
+
+---
+
+## 6. ⚙️ Common Methods
+
+| Method                | Description            | Example                                  |
+| --------------------- | ---------------------- | ---------------------------------------- |
+| `setItem(key, value)` | Stores data            | `localStorage.setItem('name', 'Rayied')` |
+| `getItem(key)`        | Retrieves data         | `localStorage.getItem('name')`           |
+| `removeItem(key)`     | Deletes a specific key | `localStorage.removeItem('name')`        |
+| `clear()`             | Clears all keys        | `localStorage.clear()`                   |
+
+---
+
+## 7. ⚠️ Important Considerations
+
+- Both are **synchronous APIs** — avoid using them for large data to prevent blocking the main thread.
+- Data is stored as **strings only**.
+- No built-in expiration — manually handle expiration logic if needed.
+- Avoid storing sensitive information like passwords or tokens unless encrypted.
+
+Example of manual expiration logic:
+
+```js
+const now = new Date();
+const item = {
+  value: "Rayied",
+  expiry: now.getTime() + 3600000, // 1 hour
+};
+localStorage.setItem("user", JSON.stringify(item));
+
+const getItem = (key) => {
+  const stored = JSON.parse(localStorage.getItem(key));
+  if (!stored) return null;
+  if (new Date().getTime() > stored.expiry) {
+    localStorage.removeItem(key);
+    return null;
+  }
+  return stored.value;
+};
+```
+
+---
+
+## 8. 🔐 When Not to Use localStorage/sessionStorage
+
+- For **sensitive data** (use secure cookies or server-side storage).
+- For **large data** (use IndexedDB instead).
+- For **multi-tab synchronization**, consider using the `storage` event:
+
+```js
+window.addEventListener("storage", (event) => {
+  console.log("Storage changed:", event);
+});
+```
+
+---
+
+## 9. 🧾 Summary Table
+
+| Use Case                | Best Option    |
+| ----------------------- | -------------- |
+| Long-term user data     | localStorage   |
+| Temporary, per-tab data | sessionStorage |
+| Cross-tab persistence   | localStorage   |
+| Security-sensitive data | Avoid both     |
+
+---
+
+✅ **In Short:**
+
+- `localStorage` → Long-term, persistent data
+- `sessionStorage` → Temporary, tab-specific data
+

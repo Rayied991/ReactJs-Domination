@@ -1107,3 +1107,218 @@ window.addEventListener("storage", (event) => {
 - `localStorage` → Long-term, persistent data
 - `sessionStorage` → Temporary, tab-specific data
 
+# 🌐 API Calling in Web Development
+
+## 🔄 Overview
+
+APIs (Application Programming Interfaces) enable **communication between frontend and backend**.  
+They allow data to be sent, received, and manipulated across applications or services.
+
+### 🔁 Flow of Data
+
+1. **Frontend → API → Backend → Database**
+2. **Backend → API → Frontend**
+
+👉 The frontend sends an HTTP request to the backend (usually via an API endpoint), and the backend fetches data from the database and responds.
+
+---
+
+## 🧩 Methods for API Calling
+
+### 1️⃣ Using `fetch()` (Built-in JavaScript Method)
+
+- Available by default in browsers.
+- Returns a **Promise** that resolves into a response object.
+- Requires manual conversion to JSON.
+
+```javascript
+// Example: GET request using fetch()
+fetch("https://api.example.com/users")
+  .then((response) => response.json())
+  .then((data) => console.log(data))
+  .catch((error) => console.error("Error:", error));
+```
+
+```javascript
+// Example: POST request using fetch()
+fetch("https://api.example.com/add-user", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ name: "Rayied", age: 25 }),
+})
+  .then((res) => res.json())
+  .then((data) => console.log("User added:", data))
+  .catch((err) => console.error(err));
+```
+
+🧠 **Tips:**
+
+- Always handle `.catch()` for error handling.
+- Use `async/await` for cleaner and more readable code.
+
+```javascript
+// Example with async/await
+async function getData() {
+  try {
+    const res = await fetch("https://api.example.com/data");
+    const data = await res.json();
+    console.log(data);
+  } catch (error) {
+    console.error(error);
+  }
+}
+getData();
+```
+
+---
+
+### 2️⃣ Using `axios()` (External Library)
+
+- Simplifies syntax and provides better error handling.
+- Automatically converts JSON data.
+- Supports interceptors, cancellation, and timeout.
+- Works in both browser and Node.js environments.
+
+📦 **Install axios:**
+
+```bash
+npm install axios
+```
+
+```javascript
+import axios from "axios";
+
+// Example: GET request using axios
+axios
+  .get("https://api.example.com/users")
+  .then((res) => console.log(res.data))
+  .catch((err) => console.error(err));
+```
+
+```javascript
+// Example: POST request using axios
+axios
+  .post("https://api.example.com/add-user", {
+    name: "Rayied",
+    age: 25,
+  })
+  .then((res) => console.log("User added:", res.data))
+  .catch((err) => console.error("Error:", err));
+```
+
+🧠 **Advantages of axios:**
+
+- Supports interceptors (useful for authentication tokens).
+- Handles JSON automatically.
+- Supports request cancellation and timeout configuration.
+
+```javascript
+// Example with async/await
+async function fetchData() {
+  try {
+    const res = await axios.get("https://api.example.com/info");
+    console.log(res.data);
+  } catch (error) {
+    console.error("Error fetching data:", error);
+  }
+}
+fetchData();
+```
+
+---
+
+## ⚖️ Comparison Table
+
+| Feature         | fetch()    | axios()                  |
+| --------------- | ---------- | ------------------------ |
+| Built-in        | ✅ Yes     | ❌ No (requires install) |
+| JSON Conversion | ❌ Manual  | ✅ Automatic             |
+| Interceptors    | ❌ No      | ✅ Yes                   |
+| Error Handling  | Basic      | Advanced                 |
+| Node.js Support | ⚠️ Limited | ✅ Full                  |
+
+---
+
+## 🧠 Best Practices
+
+- Handle errors using `try/catch` or `.catch()` always.
+- Store API URLs in environment variables.
+- Separate API calls into a dedicated file (e.g., `api.js`).
+- Secure sensitive data like API keys using environment variables.
+- Use `axios.interceptors` for adding authorization headers.
+
+```javascript
+// Example: Using interceptor in axios
+axios.interceptors.request.use((config) => {
+  config.headers.Authorization = `Bearer ${localStorage.getItem("token")}`;
+  return config;
+});
+```
+
+---
+
+## 🧩 Example Flow Summary (Frontend + Backend)
+
+**Frontend (React)** → sends request via `fetch()` or `axios()` →  
+**Backend (Node.js/Express)** → processes request and fetches data from **Database** →  
+Returns data → displayed in **Frontend UI**.
+
+---
+
+## ⚙️ React Example with `fetch()` and `axios()`
+
+```javascript
+import axios from "axios";
+import { useState } from "react";
+
+const App = () => {
+  const [data, setData] = useState([]);
+
+  const getDataAxios = async () => {
+    const res = await axios.get("https://picsum.photos/v2/list");
+    setData(res.data);
+  };
+
+  const getDataFetch = async () => {
+    const response = await fetch("https://jsonplaceholder.typicode.com/users");
+    const data = await response.json();
+    console.log(data);
+  };
+
+  return (
+    <div>
+      <button onClick={getDataFetch}>Get Data Fetch</button>
+      <button onClick={getDataAxios}>Get Data Axios</button>
+      <div>
+        {data.map((ele, idx) => (
+          <h3 key={idx}>
+            Hello, {ele.author}, {idx + 1}
+          </h3>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export default App;
+```
+
+---
+
+## 💡 Extra Notes
+
+- Use **React Query** or **SWR** for automatic caching, refetching, and state management for APIs.
+- In large projects, create an `apiClient.js` file to centralize all axios configurations.
+- Always validate data on both backend and frontend.
+- Avoid hardcoding URLs — use `.env` variables instead.
+
+---
+
+📘 _Quick Tip:_  
+Use `axios` for complex projects with authentication, multiple API calls, or advanced error handling.  
+Use `fetch` for simple or lightweight projects.
+
+---
+
+© 2025 — **API Calling Guide by Rayied**
+

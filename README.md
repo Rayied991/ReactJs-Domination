@@ -1775,3 +1775,198 @@ function App() {
 
 ---
 
+# React Context API Example
+
+This document explains **Context API in React** with a working example and a diagram.
+
+---
+
+## Context API Overview
+
+- Data normally flows **top → bottom** (App → Navbar → Sidebar → UserProfile → Username)
+- **Cannot flow bottom → top** easily without prop drilling
+- Context API allows **centralized data** accessible by any component
+- Useful for: theme, authentication, subscription info, settings, etc.
+
+### Key Concepts
+
+1. **Context**: Create a shared context
+2. **Provider**: Provides the data to all children components
+3. **useContext**: Allows any child component to consume the context
+
+---
+
+## Prop as Children Example
+
+### App.jsx
+
+```jsx
+import { useState } from "react";
+import Navbar from "./components/Navbar";
+
+const App = () => {
+  const [theme, setTheme] = useState("light");
+
+  return (
+    <div>
+      <Navbar theme={theme}>
+        <h2>This is Navbar</h2>
+        <h2>Good Navbar</h2>
+      </Navbar>
+    </div>
+  );
+};
+
+export default App;
+```
+
+### Navbar.jsx
+
+```jsx
+import Nav2 from "./Nav2";
+
+const Navbar = ({ children, theme }) => {
+  return (
+    <div className="nav">
+      <h2>Navbar</h2>
+      {children}
+      <Nav2 theme={theme} />
+    </div>
+  );
+};
+
+export default Navbar;
+```
+
+---
+
+## Context API in Action
+
+### main.jsx
+
+```jsx
+import { createRoot } from "react-dom/client";
+import App from "./App.jsx";
+import ThemeContext from "./Context/ThemeContext.jsx";
+import "./index.css";
+
+createRoot(document.getElementById("root")).render(
+  <ThemeContext>
+    <App />
+  </ThemeContext>
+);
+```
+
+### ThemeContext.jsx
+
+```jsx
+import { createContext, useState } from "react";
+
+export const ThemeDataContext = createContext();
+
+const ThemeContext = (props) => {
+  const [theme, setTheme] = useState("light");
+
+  return (
+    <ThemeDataContext.Provider value={[theme, setTheme]}>
+      {props.children}
+    </ThemeDataContext.Provider>
+  );
+};
+
+export default ThemeContext;
+```
+
+### Navbar.jsx
+
+```jsx
+import { useContext } from "react";
+import { ThemeDataContext } from "../Context/ThemeContext";
+import Nav2 from "./Nav2";
+
+const Navbar = () => {
+  const [theme] = useContext(ThemeDataContext);
+  return (
+    <div className={theme}>
+      <h2>This is Navbar</h2>
+      <Nav2 />
+    </div>
+  );
+};
+
+export default Navbar;
+```
+
+### Nav2.jsx
+
+```jsx
+import { useContext } from "react";
+import { ThemeDataContext } from "../Context/ThemeContext";
+
+const Nav2 = () => {
+  const [theme] = useContext(ThemeDataContext);
+  return (
+    <div className="nav2">
+      <h4>Home</h4>
+      <h4>About</h4>
+      <h4>Contact</h4>
+      <h4>Services</h4>
+      <h4>{theme}</h4>
+    </div>
+  );
+};
+
+export default Nav2;
+```
+
+### Button.jsx
+
+```jsx
+import { useContext } from "react";
+import { ThemeDataContext } from "../Context/ThemeContext";
+
+const Button = () => {
+  const [theme, setTheme] = useContext(ThemeDataContext);
+
+  const changeTheme = () => {
+    setTheme(theme === "light" ? "dark" : "light");
+  };
+
+  return (
+    <div>
+      <button onClick={changeTheme}>Change Theme {theme}</button>
+    </div>
+  );
+};
+
+export default Button;
+```
+
+---
+
+## Diagram — Context Flow
+
+```
+       ThemeContext (Provider)
+               │
+       ┌───────┴────────┐
+       │                │
+     Navbar           Button
+       │
+     Nav2
+```
+
+- Any component inside `ThemeContext.Provider` can **access and modify theme** using `useContext`.
+- Changing theme in `Button` updates all components automatically.
+
+---
+
+## Summary
+
+- **Context API centralizes data**
+- Avoids **prop drilling**
+- Use for **theme, auth, subscriptions, settings**
+- Components: `createContext`, `Provider`, `useContext`
+
+---
+

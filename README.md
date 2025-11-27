@@ -1322,3 +1322,456 @@ Use `fetch` for simple or lightweight projects.
 
 © 2025 — **API Calling Guide by Rayied**
 
+# React: useEffect, Lazy Loading, Infinite Scrolling, and Routing
+
+This document explains key React features with clear examples and best practices. It includes: `useEffect` (with dependency and cleanup logic), image lazy loading, infinite scrolling, and `react-router-dom` routing (BrowserRouter, HashRouter, MemoryRouter, nested & dynamic routes). Copy the examples directly into your project.
+
+---
+
+## Table of Contents
+
+1. [useEffect basics](#useeffect-basics)
+2. [useEffect dependencies & cleanup](#useeffect-dependencies--cleanup)
+3. [Practical useEffect examples](#practical-useeffect-examples)
+4. [Image lazy loading techniques](#image-lazy-loading-techniques)
+5. [Infinite scrolling pattern](#infinite-scrolling-pattern)
+6. [React Router (react-router-dom) — installation & concepts](#react-router-react-router-dom)
+7. [BrowserRouter vs HashRouter vs MemoryRouter vs StaticRouter](#router-types)
+8. [Links, navigation, preventing reloads](#links-and-preventing-reloads)
+9. [Nested routes & dynamic routes](#nested-and-dynamic-routes)
+10. [useParams, useNavigate, 404 handling](#useparams-usenavigate-404)
+11. [Full small example project structure & notes]
+
+---
+
+## useEffect basics
+
+`useEffect` runs side-effects in function components. Side-effects include: data fetching, subscriptions, timers, DOM mutations, manual event listeners.
+
+```jsx
+import React, { useEffect, useState } from "react";
+
+function Example() {
+  const [count, setCount] = useState(0);
+
+  // runs after every render (mount and update)
+  useEffect(() => {
+    console.log("Effect ran: count is", count);
+  });
+
+  return (
+    <div>
+      <p>{count}</p>
+      <button onClick={() => setCount((c) => c + 1)}>Increment</button>
+    </div>
+  );
+}
+```
+
+**Important:** If you pass no dependency array (as above), the effect runs after every render. This can be expensive.
+
+---
+
+## useEffect dependencies & cleanup
+
+`useEffect` accepts a second argument — the dependency array. It controls when the effect runs:
+
+- `[]` — run once after the first render (componentDidMount equivalent).
+- `[a, b]` — run after the first render and whenever `a` or `b` change.
+- **No array** — run after every render.
+
+### Cleanup function
+
+Return a cleanup function from the effect to clean subscriptions, timers, or listeners. Cleanup runs before the effect re-runs and when the component unmounts.
+
+```jsx
+useEffect(() => {
+  const id = setInterval(() => {
+    console.log("tick");
+  }, 1000);
+
+  return () => {
+    clearInterval(id); // cleanup when dependencies change or unmount
+  };
+}, []); // runs once
+```
+
+---
+
+## Practical useEffect examples
+
+### Example 1 — Run effect only when a specific state variable changes
+
+```jsx
+import React, { useEffect, useState } from "react";
+
+export default function App() {
+  const [num, setNum] = useState(0);
+  const [num2, setNum2] = useState(100);
+
+  useEffect(() => {
+    console.log("useEffect running because num changed:", num);
+  }, [num]); // only runs when `num` changes
+
+  return (
+    <div>
+      <h1> num is {num}</h1>
+      <h1> num2 is {num2}</h1>
+      <button
+        onMouseEnter={() => setNum((n) => n + 1)}
+        onMouseLeave={() => setNum2((n) => n + 10)}
+      >
+        Hover
+      </button>
+    </div>
+  );
+}
+```
+
+### Example 2 — Fetch data once on mount
+
+```jsx
+useEffect(() => {
+  let mounted = true;
+  async function load() {
+    const res = await fetch("/api/items");
+    const data = await res.json();
+    if (mounted) setItems(data);
+  }
+  load();
+  return () => {
+    mounted = false;
+  };
+}, []);
+```
+
+This pattern prevents state updates after unmount.
+
+---
+
+## Image lazy loading techniques
+
+### 1. Native browser lazy loading
+
+Use `loading="lazy"` on `<img>` — simplest and supported in modern browsers.
+
+```jsx
+<img src="/large.jpg" alt="..." loading="lazy" />
+```
+
+### 2. React `loading` placeholder + `IntersectionObserver`
+
+Use an `IntersectionObserver` to swap in the real `src` when the image enters the viewport.
+
+```jsx
+import React, { useRef, useEffect, useState } from "react";
+
+function LazyImage({ src, alt, placeholder }) {
+  const ref = useRef();
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (!ref.current) return;
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setVisible(true);
+          obs.disconnect();
+        }
+      });
+    });
+    obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <img ref={ref} src={visible ? src : placeholder} alt={alt} loading="lazy" />
+  );
+}
+```
+
+### 3. React libraries
+
+Use `react-lazyload`, `react-intersection-observer`, or `lazysizes` for more features like placeholders, fade-in, and responsive image loading.
+
+---
+
+## Infinite scrolling pattern
+
+Infinite scrolling loads more items as the user scrolls near the bottom. Two common approaches:
+
+1. Listen to `scroll` and check position (older, less efficient).
+2. Use `IntersectionObserver` on a sentinel element (recommended).
+
+### Example: Infinite scroll with IntersectionObserver
+
+```jsx
+import React, { useEffect, useRef, useState } from "react";
+
+function InfiniteList({ fetchPage }) {
+  const [items, setItems] = useState([]);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const loaderRef = useRef(null);
+
+  useEffect(() => {
+    let mounted = true;
+    fetchPage(page).then(({ data, more }) => {
+      if (!mounted) return;
+      setItems((prev) => [...prev, ...data]);
+      setHasMore(more);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [page]);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const first = entries[0];
+        if (first.isIntersecting && hasMore) {
+          setPage((p) => p + 1);
+        }
+      },
+      { threshold: 1 }
+    );
+
+    const current = loaderRef.current;
+    if (current) observer.observe(current);
+    return () => observer.disconnect();
+  }, [hasMore]);
+
+  return (
+    <div>
+      {items.map((it, i) => (
+        <div key={i}>{it.title}</div>
+      ))}
+      <div ref={loaderRef} style={{ height: 1 }} />
+      {!hasMore && <p>No more items</p>}
+    </div>
+  );
+}
+
+export default InfiniteList;
+```
+
+**Tips:** debounce API calls, show skeleton loaders, handle errors, and use page size limits.
+
+---
+
+## React Router (react-router-dom)
+
+### Install
+
+```bash
+npm install react-router-dom@6
+# or
+yarn add react-router-dom@6
+```
+
+> We use v6+ syntax (hooks-based): `Routes`, `Route`, `Navigate`, `useParams`, `useNavigate`.
+
+### Basic setup (BrowserRouter)
+
+```jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import About from "./pages/About";
+import Courses from "./pages/Courses";
+
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/courses" element={<Courses />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## BrowserRouter vs HashRouter vs MemoryRouter vs StaticRouter
+
+- **BrowserRouter**: uses HTML5 history API. Good for normal web apps served by a server configured to return `index.html` for unknown routes.
+- **HashRouter**: uses hash portion (`/#/path`) and does not send route info to the server; good for static hosting without server-side fallback.
+- **MemoryRouter**: stores location in memory; useful for tests or non-DOM environments.
+- **StaticRouter**: used for server-side rendering (example: Next.js internal routing uses a different mechanism).
+
+Example of HashRouter:
+
+```jsx
+import { HashRouter, Routes, Route } from "react-router-dom";
+
+<HashRouter>
+  <Routes>
+    <Route path="/" element={<Home />} />
+  </Routes>
+</HashRouter>;
+```
+
+---
+
+## Links and preventing full-page reloads
+
+Use `Link` (or `NavLink`) from `react-router-dom` instead of `<a>` to navigate client-side without reloading:
+
+```jsx
+import { Link } from "react-router-dom";
+
+<Link to="/courses">Courses</Link>;
+```
+
+`NavLink` provides `active` styling utilities.
+
+---
+
+## Nested routes & dynamic routes
+
+### Nested routes example
+
+Folder structure:
+
+```
+/src/pages/
+  Courses/
+    index.jsx         // shows list
+    CourseDetails.jsx // shows one course
+```
+
+Routes:
+
+```jsx
+<Routes>
+  <Route path="/courses" element={<CoursesLayout />}>
+    <Route index element={<CoursesList />} />
+    <Route path=":id" element={<CourseDetails />} />
+  </Route>
+</Routes>
+```
+
+Where `CoursesLayout` renders an `<Outlet />` to show nested children.
+
+### Dynamic routes
+
+`/courses/:id` — `:id` is a parameter you can read with `useParams()`.
+
+```jsx
+import { useParams } from "react-router-dom";
+
+function CourseDetails() {
+  const { id } = useParams();
+  // fetch course by id
+}
+```
+
+---
+
+## useParams, useNavigate, and 404 handling
+
+- `useParams()` — read route params.
+- `useNavigate()` — programmatic navigation (like redirect after login).
+- `Navigate` component — declarative redirect.
+
+Example: redirect after form submit
+
+```jsx
+import { useNavigate } from "react-router-dom";
+
+function Register() {
+  const navigate = useNavigate();
+  async function onSubmit(data) {
+    await api.register(data);
+    navigate("/login");
+  }
+}
+```
+
+404 page — match all unmatched routes with `path="*"`:
+
+```jsx
+<Routes>
+  {/* other routes */}
+  <Route path="*" element={<NotFound />} />
+</Routes>
+```
+
+---
+
+## Example: Small project wiring
+
+```
+src/
+  App.jsx
+  index.jsx
+  pages/
+    Home.jsx
+    Courses/
+      index.jsx
+      CourseDetails.jsx
+    NotFound.jsx
+```
+
+`index.jsx`:
+
+```jsx
+import React from "react";
+import { createRoot } from "react-dom/client";
+import App from "./App";
+
+createRoot(document.getElementById("root")).render(<App />);
+```
+
+`App.jsx`:
+
+```jsx
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Courses from "./pages/Courses";
+import CourseDetails from "./pages/Courses/CourseDetails";
+import NotFound from "./pages/NotFound";
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/courses" element={<Courses />} />
+        <Route path="/courses/:id" element={<CourseDetails />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+```
+
+---
+
+## Notes, pitfalls & best practices
+
+- Always add dependency arrays to `useEffect` to avoid unwanted runs.
+- Prefer `IntersectionObserver` over `scroll` events for performance.
+- Cancel async calls in effects (mounted flag or AbortController) to avoid setting state on unmounted components.
+- Use `React.lazy` + `Suspense` for code-splitting components (not for data loading).
+
+Example of code splitting:
+
+```jsx
+import React, { Suspense } from "react";
+const Heavy = React.lazy(() => import("./Heavy"));
+
+function App() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <Heavy />
+    </Suspense>
+  );
+}
+```
+
+---
+

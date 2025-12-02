@@ -14,6 +14,7 @@ function App() {
   useEffect(() => {
     setTimeout(() => {
       setCount((count) => count + 1);
+      setName("Rayied2");
     }, 2000);
   }, [count, name]);
   return (

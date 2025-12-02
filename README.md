@@ -673,6 +673,7 @@ listeners
 
 ## 5. `useRef` – Mutable Values / DOM Access
 
+UseRef is a react hook that allow us to create mutable variables,which will not re-render the components.It is also used for accessing DOM elements.
 Keeps a value that persists across renders without triggering re-render.
 
 ```jsx
@@ -686,6 +687,7 @@ inputRef.current.focus();
 ```
 
 - Useful for accessing DOM elements, storing timers, or mutable variables.
+- We use useRef hook when we don't need to re-reder components when thevalue is changed/updated.
 
 ---
 

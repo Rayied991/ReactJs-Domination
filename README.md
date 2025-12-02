@@ -1970,3 +1970,5 @@ export default Button;
 
 ---
 
+What is hooks:
+Hooks are special functions that allow us to use state and other react features in functional components

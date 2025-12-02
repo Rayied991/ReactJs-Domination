@@ -746,7 +746,13 @@ const [state, dispatch] = useReducer(reducer, { count: 0 });
 
 ## 8. `useMemo` & `useCallback` – Optimization
 
-Avoid expensive recalculations and unnecessary function re-creations.
+The useMemo Hook returns a memoized value.(it's like caching a value so that it doesn't need to be recalculated.)
+The useMemo hook only runs when one of its dependencies gets updated.This can improve the performance of the application.There is one more hook in react to improve performance, that is useCallback hook.
+The useMemo and useCallback hook are simillar.The main difference is:
+
+- useMemo returns a memoized value.
+- useCallback returns a memoized Function.
+  Avoid expensive recalculations and unnecessary function re-creations.
 
 ```jsx
 import { useMemo, useCallback } from "react";

@@ -609,9 +609,10 @@ setNumbers((prev) => [...prev, 97]);
 
 ---
 
-## 4. `useEffect` – Side Effects
+# 4. useEffect -- Side Effects in React
 
-Used for API calls, subscriptions, DOM updates, timers.
+`useEffect` is used for running side effects such as API calls,
+subscriptions, DOM updates, and timers.
 
 ```jsx
 import { useEffect } from "react";
@@ -622,9 +623,51 @@ useEffect(() => {
 }, [num]);
 ```
 
-- Empty array `[]` → runs only on mount.
-- No dependency array → runs on every render.
-- Return a function to handle cleanup.
+## 🔹 Dependency Rules
+
+- **Empty array `[]`** → Runs **only once** (on mount).
+- **No dependency array** → Runs **after every render**.
+
+---
+
+## 🔹 Example Comparison
+
+### ✅ Example 1 -- with `[]`
+
+```jsx
+useEffect(() => {
+  setTimeout(() => {
+    setCount((count) => count + 1);
+  }, 2000);
+}, []);
+```
+
+✔ Runs **once** → count increases **only one time**.
+
+---
+
+### ✅ Example 2 -- without dependency array
+
+```jsx
+useEffect(() => {
+  setTimeout(() => {
+    setCount((count) => count + 1);
+  }, 2000);
+});
+```
+
+✔ Runs **after every render**, causing **continuous increments**
+(infinite loop).
+
+---
+
+## 🔹 Cleanup Function
+
+The function returned inside `useEffect` runs: - before the next effect
+call - when the component unmounts
+
+Useful for: - clearing timers - canceling subscriptions - removing event
+listeners
 
 ---
 

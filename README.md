@@ -287,6 +287,8 @@ Two common approaches are **Feature-Based** and **Atomic Design** structures.
 
 ---
 
+### Conditional Rendering
+
 ### ⚙️ 1. Feature-Based Folder Structure
 
 #### 🧩 Concept

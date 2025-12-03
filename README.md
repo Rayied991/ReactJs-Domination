@@ -722,6 +722,16 @@ const Child = () => {
 
 ## 7. `useReducer` – Complex State
 
+useReducer is simillar to useState, but instead of providing state and setter function . It provides state and dispatch function.
+
+The useReducer hook accepts two arguments:
+
+- Reducer Function[specifies how the state gets updated]
+- initial state
+  and returns: current state and dispatch method.
+
+const [state, dispatch] = useReducer(reducer, initialState);
+
 Good for managing multiple related state values or complex logic.
 
 ```jsx

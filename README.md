@@ -693,6 +693,7 @@ inputRef.current.focus();
 
 ## 6. `useContext` – Global State
 
+useContext is a React hook that allows you access data from any component without explicitly passing it down through props at every level.Used to manage global data.
 Provides a way to share state across components without prop drilling.
 
 ```jsx

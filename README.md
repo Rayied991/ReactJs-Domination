@@ -754,6 +754,10 @@ The useMemo and useCallback hook are simillar.The main difference is:
 - useCallback returns a memoized Function.
   Avoid expensive recalculations and unnecessary function re-creations.
 
+  useCallback is a hook that lets you cache a function definiton between re-renders.
+  It means,when we use the usecallback hook, it doesn't create multiple instance of same function when re-render happens.
+  Instead of Creating new instance of the function, it provides the cached function on re-render of the component.
+
 ```jsx
 import { useMemo, useCallback } from "react";
 

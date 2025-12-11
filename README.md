@@ -2357,3 +2357,22 @@ verdict:
 Tanstack Query makes working with server-side data in React a breeze.It's fast,efficient and reduces the amount of boilerplate code you need to write.If you are working on any app that relies on API data, this tool is an absolute game-changer.
 
 installation:
+npm create vite
+npm i react-router-dom
+npm i @tanstack/react-query
+
+in React Query, the QueryClientProvider is a crucial component that provides a QueryClient instance to your React Application.This QueryClient is responsible for managing all the data fetching, caching and state management related to your queries.
+
+const queryClient = new QueryClient();
+<QueryClientProvider client={queryClient}>
+<RouterProvider router={router}></RouterProvider>;
+</QueryClientProvider>
+
+QueryClient:
+It is the core part of the react-query library. It manages the caching, background fetching,data synchronization and other query-related logic.It provides a centralized store for managing and caching asynchronous data in your application.
+
+new QueryClient():
+This creates a new QueryClient unstance wuth default settings. You can configure it with options if needed.(settings cache time,stale time...etc)
+
+QueryClientProvider:
+This component is part of react-query & is used to provide the QueryClient instance to your entire React App(or a portion of it). This makes the query client available via React's context API so that all the components in the tree can use the useQuery,useMutation and other hooks provided by react-query.

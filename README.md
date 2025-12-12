@@ -2376,3 +2376,42 @@ This creates a new QueryClient unstance wuth default settings. You can configure
 
 QueryClientProvider:
 This component is part of react-query & is used to provide the QueryClient instance to your entire React App(or a portion of it). This makes the query client available via React's context API so that all the components in the tree can use the useQuery,useMutation and other hooks provided by react-query.
+
+useQuery({
+queryKey: ["posts"],
+queryFn: getPostsData(),
+});
+
+The queryKey is typically an array or string that uniquely identifies a query. It allows React Query to determine if the data in the cache is associated with a particular request.
+It is used to cache data with a specific key and refetch or update data when certain dependencies change.
+
+import { useQuery } from "@tanstack/react-query";
+import { fetchPosts } from "../API/api";
+export const FetchRQ = () => {
+// Fetch posts data function
+
+const { data } = useQuery({
+queryKey: ["posts"], //useState
+queryFn: fetchPosts, //useEffect
+});
+
+return (
+
+<div>
+<ul className="section-accordion">
+{data?.map((curElem) => {
+const { id, title, body } = curElem;
+return (
+<li key={id}>
+<p>{title}</p>
+<p>{body}</p>
+</li>
+);
+})}
+</ul>
+</div>
+);
+};
+export default FetchRQ;
+
+Loading & Error state in TSQ:

@@ -962,7 +962,259 @@ const ComplexForm = () => {
 
 **Remember**: The goal is to avoid calling `useId` for every single element. Use one call per logical group and append suffixes for individual elements.
 
-## 9. `useMemo` & `useCallback` – Optimization
+# 9.`use` – Reading Context and Promises
+
+## Overview
+
+`use` is a React Hook that lets you read the value of resources like Context or Promises. Unlike other hooks, `use` can be called inside conditionals and loops, making it more flexible than traditional hooks like `useContext`.
+
+## Basic Syntax
+
+```javascript
+const value = use(resource);
+```
+
+- **Parameters**: A Context or Promise you want to read
+- **Returns**: The value of the Context or resolved Promise
+
+## Reading Context with `use`
+
+### Traditional Approach: `useContext`
+
+```javascript
+import { useContext } from "react";
+import { ThemeContext } from "./ThemeContext";
+
+function Button() {
+  // ❌ Must be called at the top level
+  const theme = useContext(ThemeContext);
+
+  // ❌ Cannot use inside conditions
+  // if (condition) {
+  //   const theme = useContext(ThemeContext); // ERROR!
+  // }
+
+  return <button className={theme}>Click me</button>;
+}
+```
+
+**Limitations of `useContext`:**
+
+- Must be called at the top level of the component
+- Cannot be used inside conditionals (`if` statements)
+- Cannot be used inside loops (`for`, `while`, `map`)
+- Less flexible for conditional logic
+
+### Modern Approach: `use` Hook
+
+```javascript
+import { use } from "react";
+import { ThemeContext } from "./ThemeContext";
+
+function Button({ isPrimary }) {
+  // ✅ Can be called inside conditionals
+  if (isPrimary) {
+    const theme = use(ThemeContext);
+    return <button className={theme.primary}>Primary Button</button>;
+  }
+
+  const theme = use(ThemeContext);
+  return <button className={theme.secondary}>Secondary Button</button>;
+}
+```
+
+## Key Differences: `use` vs `useContext`
+
+| Feature             | `useContext`   | `use`           |
+| ------------------- | -------------- | --------------- |
+| Top-level only      | ✅ Required    | ❌ Not required |
+| Inside conditionals | ❌ Not allowed | ✅ Allowed      |
+| Inside loops        | ❌ Not allowed | ✅ Allowed      |
+| Flexibility         | Limited        | High            |
+| React Version       | All versions   | React 19+       |
+
+## Practical Examples
+
+### Example 1: Conditional Context Reading
+
+```javascript
+import { use } from "react";
+import { ThemeContext, UserContext } from "./contexts";
+
+function Profile({ isLoggedIn }) {
+  // Only read UserContext when logged in
+  if (isLoggedIn) {
+    const user = use(UserContext);
+    const theme = use(ThemeContext);
+
+    return (
+      <div className={theme.userProfile}>
+        <h1>Welcome, {user.name}!</h1>
+        <p>Email: {user.email}</p>
+      </div>
+    );
+  }
+
+  return <div>Please log in</div>;
+}
+```
+
+### Example 2: Using Context in Loops
+
+```javascript
+import { use } from "react";
+import { LanguageContext } from "./LanguageContext";
+
+function TranslatedList({ items, shouldTranslate }) {
+  return (
+    <ul>
+      {items.map((item) => {
+        // ✅ Can use inside map loop
+        if (shouldTranslate) {
+          const language = use(LanguageContext);
+          return <li key={item.id}>{translate(item.text, language)}</li>;
+        }
+        return <li key={item.id}>{item.text}</li>;
+      })}
+    </ul>
+  );
+}
+```
+
+### Example 3: Dynamic Context Selection
+
+```javascript
+import { use } from "react";
+import { LightThemeContext, DarkThemeContext } from "./themes";
+
+function ThemedComponent({ useDarkMode }) {
+  // Choose which context to read based on condition
+  const theme = use(useDarkMode ? DarkThemeContext : LightThemeContext);
+
+  return (
+    <div style={{ background: theme.background, color: theme.text }}>
+      <h1>Themed Content</h1>
+    </div>
+  );
+}
+```
+
+## Reading Promises with `use`
+
+The `use` hook can also read Promises, making it useful for data fetching:
+
+```javascript
+import { use, Suspense } from "react";
+
+function UserProfile({ userPromise }) {
+  // ✅ use can read promises
+  const user = use(userPromise);
+
+  return (
+    <div>
+      <h1>{user.name}</h1>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+
+function App() {
+  const userPromise = fetchUser(userId);
+
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <UserProfile userPromise={userPromise} />
+    </Suspense>
+  );
+}
+```
+
+## When to Use `use` vs `useContext`
+
+### Use `use` when:
+
+- You need to read context conditionally
+- You're working inside loops or iterations
+- You want more flexible context consumption
+- You're using React 19 or later
+
+### Use `useContext` when:
+
+- You're working with older React versions
+- You need the context value at the component's top level
+- The simpler API is sufficient for your use case
+
+## Best Practices
+
+### ✅ Do:
+
+- Use `use` for conditional context reading
+- Combine `use` with Suspense for promise handling
+- Leverage the flexibility for complex conditional logic
+- Use inside loops when you need context-aware rendering
+
+### ❌ Don't:
+
+- Overuse conditional context reading (can make code harder to follow)
+- Forget that `use` requires React 19+
+- Use `use` with resources that might be null/undefined without proper checks
+
+## Important Notes
+
+⚠️ **React Version Requirement**: The `use` hook is available in React 19 and later. Make sure your project uses a compatible version.
+
+⚠️ **Suspense Integration**: When using `use` with Promises, wrap your component in a `Suspense` boundary to handle loading states.
+
+⚠️ **Rules Still Apply**: While `use` can be called conditionally, it should still be called in the same order on each render for a given code path.
+
+## Migration Example
+
+### Before (useContext):
+
+```javascript
+function Header() {
+  const theme = useContext(ThemeContext);
+  const user = useContext(UserContext);
+
+  // Had to read both contexts even if we only need one
+  if (user.isGuest) {
+    return <div className={theme}>Guest Mode</div>;
+  }
+
+  return <div className={theme}>Welcome, {user.name}</div>;
+}
+```
+
+### After (use):
+
+```javascript
+function Header() {
+  const user = use(UserContext);
+
+  if (user.isGuest) {
+    // Only read theme when needed
+    const theme = use(ThemeContext);
+    return <div className={theme}>Guest Mode</div>;
+  }
+
+  const theme = use(ThemeContext);
+  return <div className={theme}>Welcome, {user.name}</div>;
+}
+```
+
+## Key Takeaways
+
+- `use` is more flexible than `useContext` – it can be called inside conditionals and loops
+- `use` works similarly to `useContext` when reading context values
+- `use` can also read Promises, making it useful for async data
+- Prefer `use` over `useContext` in React 19+ for its added flexibility
+- The ability to conditionally read context can lead to more efficient and cleaner code
+
+---
+
+**Remember**: `use` is the future of context consumption in React. It provides the same functionality as `useContext` but with significantly more flexibility for conditional and dynamic scenarios.
+
+## 10.. `useMemo` & `useCallback` – Optimization
 
 The useMemo Hook returns a memoized value.(it's like caching a value so that it doesn't need to be recalculated.)
 The useMemo hook only runs when one of its dependencies gets updated.This can improve the performance of the application.There is one more hook in react to improve performance, that is useCallback hook.

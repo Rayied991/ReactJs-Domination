@@ -1190,7 +1190,6 @@ function Header() {
 ```javascript
 function Header() {
   const user = use(UserContext);
-
   if (user.isGuest) {
     // Only read theme when needed
     const theme = use(ThemeContext);

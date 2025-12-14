@@ -1,5 +1,12 @@
+import About from "./components/About";
+import { BioProvider } from "./context";
+
 const App = () => {
-  return <div>App</div>;
+  return (
+    <BioProvider>
+      <About />
+    </BioProvider>
+  );
 };
 
 export default App;

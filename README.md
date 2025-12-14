@@ -757,7 +757,212 @@ const [state, dispatch] = useReducer(reducer, { count: 0 });
 
 ---
 
-## 8. `useMemo` & `useCallback` – Optimization
+# 8. `useId` – Unique IDs for Accessibility
+
+## Overview
+
+`useId` is a React Hook that generates unique IDs for accessibility attributes. It ensures each component instance gets consistent, unique identifiers across server and client renders, making it essential for proper form accessibility.
+
+## Basic Syntax
+
+```javascript
+const id = useId();
+```
+
+- **Parameters**: None
+- **Returns**: A unique ID string for the component instance
+- **Warning**: ⚠️ Never use `useId` to generate keys for list items
+
+## The Problem: Multiple Input Fields
+
+When building forms with many input fields, you might initially think you need separate `useId` calls for each field:
+
+### ❌ Inefficient Approach
+
+```javascript
+import { useId } from "react";
+
+const UseID = () => {
+  const usernameid = useId();
+  const emailid = useId();
+  const passwordid = useId();
+
+  // Imagine having 100 fields - you'd need 100 useId calls!
+
+  return (
+    <form>
+      <div>
+        <label htmlFor={usernameid}>Username:</label>
+        <input type="text" id={usernameid} name="name" />
+      </div>
+      <div>
+        <label htmlFor={passwordid}>Password:</label>
+        <input type="password" id={passwordid} name="password" />
+      </div>
+      <div>
+        <label htmlFor={emailid}>Email:</label>
+        <input type="text" id={emailid} name="email" />
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
+```
+
+**Issues with this approach:**
+
+- Redundant hook calls
+- Not scalable for forms with many fields
+- Harder to maintain
+- Unnecessary performance overhead
+
+## The Solution: Single `useId` with Suffixes
+
+### ✅ Efficient Approach
+
+```javascript
+import { useId } from "react";
+
+const UseID = () => {
+  const id = useId(); // Single call for the entire form
+
+  return (
+    <form>
+      <div>
+        <label htmlFor={id + "-username"}>Username:</label>
+        <input type="text" id={id + "-username"} name="name" />
+      </div>
+      <div>
+        <label htmlFor={id + "-password"}>Password:</label>
+        <input type="password" id={id + "-password"} name="password" />
+      </div>
+      <div>
+        <label htmlFor={id + "-email"}>Email:</label>
+        <input type="text" id={id + "-email"} name="email" />
+      </div>
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
+```
+
+## How It Works
+
+1. **Single Hook Call**: Call `useId()` once at the component level
+2. **Generate Unique IDs**: Append descriptive suffixes to create unique IDs
+3. **Maintain Consistency**: Each field gets a unique ID derived from the base ID
+
+### Example Output
+
+If `useId()` returns `:r1:`, the generated IDs would be:
+
+- Username: `:r1:-username`
+- Password: `:r1:-password`
+- Email: `:r1:-email`
+
+## Benefits of This Pattern
+
+### Scalability
+
+- Easy to add new fields without additional `useId` calls
+- Perfect for forms with 10, 50, or even 100+ fields
+
+### Performance
+
+- Reduces the number of hook calls
+- Minimizes component re-render overhead
+
+### Maintainability
+
+- Cleaner, more readable code
+- Consistent ID generation pattern
+- Easy to understand and modify
+
+### Server-Side Rendering (SSR)
+
+- IDs remain consistent between server and client
+- Prevents hydration mismatches
+
+## Best Practices
+
+### ✅ Do:
+
+- Use one `useId` call per component or logical group
+- Append descriptive suffixes (e.g., `-username`, `-email`)
+- Use kebab-case or camelCase for suffixes
+- Associate labels with inputs using `htmlFor` and `id`
+
+### ❌ Don't:
+
+- Use `useId` for generating list keys (use stable data IDs instead)
+- Call `useId` conditionally
+- Use `useId` inside loops
+
+## Advanced Example: Dynamic Form Fields
+
+```javascript
+import { useId } from "react";
+
+const DynamicForm = () => {
+  const formId = useId();
+
+  const fields = [
+    { name: "username", label: "Username", type: "text" },
+    { name: "email", label: "Email", type: "email" },
+    { name: "password", label: "Password", type: "password" },
+    { name: "confirmPassword", label: "Confirm Password", type: "password" },
+    // Add 96 more fields easily...
+  ];
+
+  return (
+    <form>
+      {fields.map((field) => (
+        <div key={field.name}>
+          <label htmlFor={`${formId}-${field.name}`}>{field.label}:</label>
+          <input
+            type={field.type}
+            id={`${formId}-${field.name}`}
+            name={field.name}
+          />
+        </div>
+      ))}
+      <button type="submit">Submit</button>
+    </form>
+  );
+};
+```
+
+## Key Takeaways
+
+- `useId` generates unique, stable IDs for accessibility
+- Call it once and reuse with suffixes for multiple elements
+- Essential for proper label-input associations
+- Scales effortlessly to large forms
+- Critical for SSR applications to avoid hydration issues
+
+## When to Use Multiple `useId` Calls
+
+You might need multiple `useId` calls when:
+
+- You have logically separate groups of elements
+- Different sections of your component need independent ID namespaces
+- You're building reusable sub-components
+
+```javascript
+const ComplexForm = () => {
+  const personalInfoId = useId(); // For personal info section
+  const addressId = useId(); // For address section
+  const paymentId = useId(); // For payment section
+
+  // Each section uses its own base ID with suffixes
+};
+```
+
+---
+
+**Remember**: The goal is to avoid calling `useId` for every single element. Use one call per logical group and append suffixes for individual elements.
+
+## 9. `useMemo` & `useCallback` – Optimization
 
 The useMemo Hook returns a memoized value.(it's like caching a value so that it doesn't need to be recalculated.)
 The useMemo hook only runs when one of its dependencies gets updated.This can improve the performance of the application.There is one more hook in react to improve performance, that is useCallback hook.
@@ -2415,3 +2620,81 @@ return (
 export default FetchRQ;
 
 Loading & Error state in TSQ:
+
+import { useQuery } from "@tanstack/react-query";
+import { fetchPosts } from "../API/api";
+export const FetchRQ = () => {
+// Fetch posts data function
+const { data, isLoading, isError, error } = useQuery({
+queryKey: ["posts"], //useState
+queryFn: fetchPosts, //useEffect
+});
+
+// conditional rendering based on loading,error
+if (isLoading) return <p>Loading..</p>;
+if (isError)
+return <p>Error: {error.message || "Something Went Wrong..."}</p>;
+
+return (
+
+<div>
+<ul className="section-accordion">
+{data?.map((curElem) => {
+const { id, title, body } = curElem;
+return (
+<li key={id}>
+<p>{title}</p>
+<p>{body}</p>
+</li>
+);
+})}
+</ul>
+</div>
+);
+};
+export default FetchRQ;
+
+React query devtools:
+npm i @tanstack/react-query-devtools
+
+---
+
+react build:
+npm run build->creates build
+
+to use in react app->
+in app.jsx:
+const App = () => {
+const queryClient = new QueryClient();
+return (
+<QueryClientProvider client={queryClient}>
+<RouterProvider router={router}></RouterProvider>;
+<ReactQueryDevtools initialIsOpen={false} /> //add this line
+</QueryClientProvider>
+);
+};
+
+useQuery: Fetches and reads data(GET requests) from an API and automatically caches the result.
+
+useMutation:
+Used for creating,updating or deleting data(POST,PUT,DELETE requests) and allows triggering manual side effects.
+
+gcTime(Garbage Collection Time):
+
+The cacheTime option in React Query has been renamed to gcTime.
+
+When you use React Query to get data, it saves the results in a local cache. This means if you ask for same data again, React Query will give you the saved data instead of making another API request. The cache updates automatically if the data changes, so you always get the latest information.
+
+Use Case:
+Imagine you're fetching a list of users. If you go back to the same page, React Query will show the saved list from the cache instead of reloading it from the server, making your app faster. If a new user is added, React Query will automatically update the list.
+By default, inactive queries are garbage collected after 5 minutes. This means that query is not being used for 5 minutes, the cache for that query will be cleaned up.
+
+const { data, isPending, isError, error } = useQuery({
+queryKey: ["posts"], //useState
+queryFn: fetchPosts, //useEffect
+// gcTime: 1000,
+});
+
+React production build:
+npm run build
+you dont keep build file you delete it after pushing it into production

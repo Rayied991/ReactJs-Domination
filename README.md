@@ -974,3 +974,5 @@ This creates an optimized production build in the `dist` folder. Deploy this fol
 ---
 
 **© 2025 — Complete React + TanStack Query Guide**
+vitest:
+npm install --save-dev vitest @testing-library/react @testing-library/user-event @testing-library/jet-dom jsdom

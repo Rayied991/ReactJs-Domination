@@ -11,5 +11,9 @@ export const useCounter = (initValue = 0) => {
     setCount((c) => c - 1);
   }
 
-  return { count, increment, decrement };
+  function reset() {
+    setCount(0);
+  }
+
+  return { count, increment, decrement, reset };
 };

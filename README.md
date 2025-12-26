@@ -974,5 +974,345 @@ This creates an optimized production build in the `dist` folder. Deploy this fol
 ---
 
 **© 2025 — Complete React + TanStack Query Guide**
-vitest:
-npm install --save-dev vitest @testing-library/react @testing-library/user-event @testing-library/jet-dom jsdom
+
+# Vitest Testing Guide for React
+
+## Installation
+
+Install the required dependencies:
+
+```bash
+npm install --save-dev vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
+```
+
+## Configuration
+
+Create `vitest.config.js` in your project root:
+
+```javascript
+import react from "@vitejs/plugin-react";
+import { defineConfig } from "vite";
+
+export default defineConfig({
+  plugins: [react()],
+  test: {
+    environment: "jsdom",
+  },
+});
+```
+
+Update your `package.json` to add the test script:
+
+```json
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview",
+  "test": "vitest"
+}
+```
+
+## Running Tests
+
+```bash
+npm test
+```
+
+---
+
+## Testing Patterns
+
+### 1. Basic Component Testing
+
+**Component: `Greetings.jsx`**
+
+```jsx
+function Greeting({ name = "World" }) {
+  return <h1>Hello, {name}!</h1>;
+}
+
+export default Greeting;
+```
+
+**Test: `greetings.test.jsx`**
+
+```jsx
+import "@testing-library/jest-dom/vitest";
+import { render, screen } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import Greeting from "./Greetings";
+
+describe("Greeting", () => {
+  it("renders a default greeting", () => {
+    render(<Greeting />);
+    expect(screen.getByText("Hello, World!")).toBeInTheDocument();
+  });
+
+  it("renders a custom greeting", () => {
+    render(<Greeting name="Rayied" />);
+    expect(screen.getByText("Hello, Rayied!")).toBeInTheDocument();
+  });
+});
+```
+
+#### Key Query Methods
+
+- **`getByText`**: Throws an error if nothing is found. Use when you're certain the element exists.
+- **`queryByText`**: Returns `null` if nothing is found (no error). Use when testing that an element doesn't exist or when unsure if it exists.
+
+---
+
+### 2. Testing User Interactions
+
+**Component: `Counter.jsx`**
+
+```jsx
+import { useCounter } from "../../hooks/useCounter";
+
+function Counter() {
+  const { count, increment } = useCounter();
+
+  return (
+    <div>
+      <p data-testid="counter-value">{count}</p>
+      <button onClick={increment}>Increment</button>
+    </div>
+  );
+}
+
+export default Counter;
+```
+
+**Test: `counter.test.jsx`**
+
+```jsx
+import "@testing-library/jest-dom/vitest";
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it } from "vitest";
+import Counter from "./Counter";
+
+describe("Counter", () => {
+  it("increments counter on button click", async () => {
+    render(<Counter />);
+
+    const button = screen.getByRole("button", { name: /increment/i });
+    const counterValue = screen.getByTestId("counter-value");
+
+    expect(counterValue.textContent).toEqual("0");
+
+    // Test button clicks
+    await userEvent.click(button);
+    expect(counterValue.textContent).toEqual("1");
+
+    await userEvent.click(button);
+    expect(counterValue.textContent).toEqual("2");
+  });
+});
+```
+
+#### Important Notes
+
+- Use `userEvent` for simulating user interactions (more realistic than `fireEvent`)
+- Always `await` user events
+- Use `data-testid` attributes for elements that are hard to query by role or text
+
+---
+
+### 3. Testing Async Operations & API Calls
+
+**Component: `UserProfile.jsx`**
+
+```jsx
+import { useEffect, useState } from "react";
+
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    fetch(`https://jsonplaceholder.typicode.com/users/${userId}`)
+      .then((res) => res.json())
+      .then((data) => setUser(data));
+  }, [userId]);
+
+  if (!user) return <p>Loading...</p>;
+
+  return (
+    <div>
+      <h2>{user.name}</h2>
+      <p>{user.email}</p>
+    </div>
+  );
+}
+
+export default UserProfile;
+```
+
+**Test: `userprofile.test.jsx`**
+
+```jsx
+import "@testing-library/jest-dom/vitest";
+import { render, screen, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import UserProfile from "./UserProfile";
+
+describe("UserProfile", () => {
+  beforeEach(() => {
+    global.fetch = vi.fn();
+  });
+
+  afterEach(() => {
+    vi.resetAllMocks();
+  });
+
+  it("fetches and displays the user data", async () => {
+    global.fetch.mockResolvedValueOnce({
+      json: async () => ({
+        id: 4,
+        name: "John",
+        email: "john@gmail.com",
+      }),
+    });
+
+    render(<UserProfile userId={4} />);
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole("heading", { name: /john/i })
+      ).toBeInTheDocument();
+      expect(screen.getByText(/john@gmail.com/i)).toBeInTheDocument();
+    });
+  });
+});
+```
+
+#### Key Concepts for Async Testing
+
+- **`vi.fn()`**: Creates a mock function
+- **`mockResolvedValueOnce()`**: Mocks a successful Promise resolution
+- **`beforeEach`**: Runs before each test (setup)
+- **`afterEach`**: Runs after each test (cleanup)
+- **`waitFor`**: Waits for async operations to complete
+- **`vi.resetAllMocks()`**: Cleans up all mocks
+
+---
+
+### 4. Testing Custom Hooks
+
+**Hook: `useCounter.jsx`**
+
+```jsx
+import { useState } from "react";
+
+export const useCounter = (initValue = 0) => {
+  const [count, setCount] = useState(initValue);
+
+  function increment() {
+    setCount((c) => c + 1);
+  }
+
+  function decrement() {
+    setCount((c) => c - 1);
+  }
+
+  function reset() {
+    setCount(0);
+  }
+
+  return { count, increment, decrement, reset };
+};
+```
+
+**Test: `usecounter.test.jsx`**
+
+```jsx
+import "@testing-library/jest-dom/vitest";
+import { act, renderHook } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
+import { useCounter } from "./useCounter";
+
+describe("useCounter", () => {
+  it("initializes with value 5", () => {
+    const { result } = renderHook(() => useCounter(5));
+    expect(result.current.count).toBe(5);
+  });
+
+  it("increments the count", () => {
+    const { result } = renderHook(() => useCounter(0));
+    expect(result.current.count).toBe(0);
+
+    act(() => {
+      result.current.increment();
+    });
+    expect(result.current.count).toBe(1);
+
+    act(() => {
+      result.current.increment();
+    });
+    expect(result.current.count).toBe(2);
+  });
+
+  it("decrements the count", () => {
+    const { result } = renderHook(() => useCounter(5));
+    expect(result.current.count).toBe(5);
+
+    act(() => {
+      result.current.decrement();
+    });
+    expect(result.current.count).toBe(4);
+  });
+
+  it("resets the count to 0", () => {
+    const { result } = renderHook(() => useCounter(4));
+    expect(result.current.count).toBe(4);
+
+    act(() => {
+      result.current.reset();
+    });
+    expect(result.current.count).toBe(0);
+  });
+});
+```
+
+#### Hook Testing Essentials
+
+- **`renderHook`**: Renders a hook in isolation
+- **`act`**: Wraps state updates to ensure they're processed
+- **`result.current`**: Access the hook's return value
+
+---
+
+## Best Practices
+
+1. **Test user behavior, not implementation details**: Focus on what users see and do
+2. **Use semantic queries**: Prefer `getByRole`, `getByLabelText` over `getByTestId`
+3. **Keep tests isolated**: Each test should be independent
+4. **Clean up after tests**: Use `afterEach` to reset mocks and state
+5. **Test loading states**: Verify both loading and success states
+6. **Use meaningful test descriptions**: Describe what the test does clearly
+7. **Await async operations**: Always use `await` with `userEvent` and `waitFor`
+
+---
+
+## Common Query Methods
+
+| Method        | Returns          | Throws Error | Use Case                       |
+| ------------- | ---------------- | ------------ | ------------------------------ |
+| `getBy*`      | Element          | Yes          | Element should exist           |
+| `queryBy*`    | Element or null  | No           | Element might not exist        |
+| `findBy*`     | Promise<Element> | Yes          | Async elements                 |
+| `getAllBy*`   | Array            | Yes          | Multiple elements              |
+| `queryAllBy*` | Array            | No           | Multiple elements (maybe none) |
+| `findAllBy*`  | Promise<Array>   | Yes          | Async multiple elements        |
+
+---
+
+## Additional Tips
+
+- Use `/i` flag in regex for case-insensitive matching: `/loading/i`
+- Mock external dependencies to keep tests fast and reliable
+- Use `screen.debug()` to see the current DOM state during debugging
+- Run tests in watch mode during development: `npm test -- --watch`

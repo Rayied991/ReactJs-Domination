@@ -1316,3 +1316,84 @@ describe("useCounter", () => {
 - Mock external dependencies to keep tests fast and reliable
 - Use `screen.debug()` to see the current DOM state during debugging
 - Run tests in watch mode during development: `npm test -- --watch`
+
+React Redux:
+Why Redux:
+in small apps you can manage data using React's state.But as the app grows,it becomes tricky to pass data between many components.
+
+Redux solves this problem by creating a centralized store that holds all the data. This store can be accessed and updated by any part of the app.
+
+React Redux= context api + useReducer
+
+![alt text](image.png)
+
+What is Redux?
+Redux is a tool that helps manage data (also known as "state") in large React apps. It allows us to keep all our app's data in a single place, known as the Redux Store, making it easy to share and update data across different parts of the app.
+
+How Redux works?
+Store: This is where Redux keeps all your data.
+Action: This is an object, which tell the redux what to do (like adding a task).
+Reducers: How to do. It actually change the data in the store based on actions.
+
+Store:
+The Redux store is lie a big box where all your application's data is kept safe. Everything you do with redux- whether adding,removing or updating data - goes throuh this store.
+
+Actions:
+This is an Object, which tell the Redux what to do (like adding a task).
+{
+type:"counter/add",
+payload:{
+incrementBy:10
+}
+}
+payload[extra information]
+
+Reducers:
+How to do.It actually change the data in the store based on the actions.
+export const CounterReducer=(state= initialState,action)=>{
+switch (action.type){
+case "counter/add":
+return
+{ ...state,value: state.value +Action.payload.incrementBy};
+default:
+return state;
+
+      }
+
+};
+
+Redux Advantages:
+-Centralized state management(Redux stores your app's state in one place, making it easier to manage and access data across components.)
+-Global access(Any component can access and update the state without passing props down.)
+-Predictable Updates:(State Changes are controlled and predictable using reducers.)
+-DevTools(Powerful tools for debugging,inspecting stateand replaying actions.)
+-Async Support(Middleware like Thunk or Saga handles async tasks,keeping the code clean.)
+
+Redux: Reducer Function
+
+A reducer is a function that decides how the state should change based on the action. The reducer takes the current state and an action and returns a new state.
+
+A key thing to remember:
+
+1. Reducers must always return a new state
+2. They should never modify the old state directly.
+
+Syntax: Reducer:
+function reducer(state=initialState,action){
+
+}
+
+The reducer takes two arguments:
+State: This is the current state.
+Action: This tells the reducer what to do . It has a type and sometimes a payload (which is the data).
+function reducer(state=initialState,action){
+switch(action.type){
+case 'ACTION_TYPE':
+return {...state,data: action.payload};
+default:
+return state;
+
+}
+}
+
+We use a switch statement to check the action's type. Based on the action type, the reducer updates the state.

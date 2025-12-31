@@ -1,0 +1,83 @@
+npm install --save-dev vitest @testing-library/react @testing-library/user-event @testing-library/jest-dom jsdom
+npm install --save-dev @vitest/coverage-v8
+npm install --save-dev @vitest/ui
+src/test/setup.ts->
+import "@testing-library/jest-dom";
+import { cleanup } from "@testing-library/react";
+import { afterEach, vi } from "vitest";
+
+afterEach(() => {
+cleanup();
+vi.clearAllMocks();
+});
+in root->
+vitest.config.ts->
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { defineConfig } from "vitest/config";
+export default defineConfig({
+plugins: [react()],
+test: {
+environment: "jsdom",
+globals: true,
+setupFiles: "./src/tests/setup",
+css: true,
+coverage: {
+provider: "v8",
+reporter: ["text", "json", "html", "lcov"],
+reportsDirectory: "./coverage",
+include: ["src/**/*.{ts,tsx}"],
+exclude: [
+"node_modules/",
+"src/tests/",
+"**/*.test.{ts,tsx}",
+"**/*.spec.{ts,tsx}",
+"src/main.tsx",
+"src/vite-env.d.ts",
+"**/*.d.ts",
+"**/*.config.{js,ts}",
+],
+thresholds: {
+lines: 70,
+functions: 70,
+branches: 70,
+statements: 70,
+},
+},
+},
+resolve: {
+alias: {
+"@": path.resolve(\_\_dirname, "./src"),
+},
+},
+});
+
+package.json->
+sripts:{
+"test": "vitest",
+"test:ui": "vitest --ui",
+"test:run": "vitest run",
+"test:watch": "vitest --watch",
+"test:coverage": "vitest run --coverage",
+"test:coverage:ui": "vitest --ui --coverage"
+}
+(base) dev-rayied@rayied-pc:~/web-dev/Frontend/LMS-Frontend$ npm run test
+
+> app@0.0.0 test
+> vitest
+
+DEV v4.0.16 /home/dev-rayied/web-dev/Frontend/LMS-Frontend
+
+✓ src/components/TestPage/Greeting.test.tsx (2 tests) 19ms
+✓ Greeting Component (2)
+✓ renders default greeting 16ms
+✓ renders greeting with name 2ms
+
+Test Files 1 passed (1)
+Tests 2 passed (2)
+Start at 03:13:59
+Duration 569ms (transform 34ms, setup 116ms, import 16ms, tests 19ms, environment 341ms)
+
+PASS Waiting for file changes...
+press h to show help, press q to quit
+

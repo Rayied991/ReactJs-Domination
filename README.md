@@ -1397,3 +1397,38 @@ return state;
 }
 
 We use a switch statement to check the action's type. Based on the action type, the reducer updates the state.
+
+Best practices Reducer:
+const ACTION_TYPE : 'task/add
+function reducer(state= initialState, action){
+switch(action.type){
+case ACTION_TYPE:
+return {...state,data:Action.payload};
+}
+}
+
+Action Types: Use a combination of the state domain(like task) and the event (like add), seperated by a slash. For example, task/add.
+Immutable state: Never directly change the state.Always return a new state object using ...state to copy the old state.
+
+store.jsx:
+/_ eslint-disable no-case-declarations _/
+const ADD_TASK = "task/add";
+const DELETE_TASK = "task/delete";
+const initialState = {
+task: [],
+};
+const taskReducer = (state = initialState, action) => {
+switch (action.type) {
+case ADD_TASK:
+return { ...state, task: [...state.task, action.payload] };
+
+    case DELETE_TASK:
+      const updatedTask = state.task.filter((currTask, idx) => {
+        return idx !== action.payload;
+      });
+      return { ...state, task: [...state.task, updatedTask] };
+    default:
+      return state;
+
+}
+};

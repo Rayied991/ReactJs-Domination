@@ -1432,3 +1432,82 @@ return { ...state, task: [...state.task, action.payload] };
 
 }
 };
+
+Redux store:
+
+The store is where Redux keeps all your app's data.
+
+It's like a database for your app, but its only for managing data in memory(not saving it permanently).
+
+Redux store- syntax:
+import {createStore} from "redux";
+const store=createStore(reducer);
+
+The createStore method creates the Redux store using a reducer function that handles how the state changes in response to actions.
+
+dispatch an Action:
+dispatch() is used to send actions to the Redux store. An action describes what change you want to make to the state(such as adding a task).
+
+store.dispatch({type: "ACTION_TYPE",payload: data});
+
+getState():
+getState() retrieves the current state of the Redux store.
+
+This is useful for accessing the state after it has been updated or to monitor changes.
+
+ex: check if deleted or not or added or not
+
+redux installation:
+npm i redux
+[now createStore is deprecated]
+
+store.jsx:
+import { createStore } from "redux";
+/_ eslint-disable no-case-declarations _/
+// define action types
+const ADD_TASK = "task/add";
+const DELETE_TASK = "task/delete";
+const initialState = {
+task: [],
+isLoading: false,
+};
+// step-1: create a simple reducer function
+const taskReducer = (state = initialState, action) => {
+switch (action.type) {
+case ADD_TASK:
+return { ...state, task: [...state.task, action.payload] };
+
+    case DELETE_TASK:
+      const updatedTask = state.task.filter((currTask, idx) => {
+        return idx !== action.payload;
+      });
+      return { ...state, task: updatedTask };
+    default:
+      return state;
+
+}
+};
+
+// step-2: create Redux store using the reducer
+const store = createStore(taskReducer);
+console.log(store);
+// step-3: log the initial state
+// The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
+
+console.log("initial state:", store.getState());
+
+// step-4: dispatch an action to add a task.
+store.dispatch({ type: ADD_TASK, payload: "Buy LocalStudio" });
+console.log("updated state: ", store.getState());
+
+store.dispatch({ type: ADD_TASK, payload: "Buy pdf" });
+console.log("updated state: ", store.getState());
+
+store.dispatch({ type: DELETE_TASK, payload: 1 });
+console.log("deleted state: ", store.getState());
+
+Redux Action:
+An action is an object that tells Redux what we want to do. It must have a type property that describes the action.
+{type:"ACTION_TYPE",payload:data}
+
+Action Creator:

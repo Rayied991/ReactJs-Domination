@@ -1506,8 +1506,115 @@ console.log("updated state: ", store.getState());
 store.dispatch({ type: DELETE_TASK, payload: 1 });
 console.log("deleted state: ", store.getState());
 
+to use store:
+import in main.jsx->
+import "./store.jsx";
+
 Redux Action:
 An action is an object that tells Redux what we want to do. It must have a type property that describes the action.
 {type:"ACTION_TYPE",payload:data}
 
 Action Creator:
+
+an action creator is a function that creates an action object. This makes it easier to create actions with different data.
+
+function actionCreator(data){
+return {type:"ACTION_TYPE",payload:data};
+}
+
+easy to write code:
+import { createStore } from "redux";
+/_ eslint-disable no-case-declarations _/
+// define action types
+const ADD_TASK = "task/add";
+const DELETE_TASK = "task/delete";
+const initialState = {
+task: [],
+isLoading: false,
+};
+// step-1: create a simple reducer function
+const taskReducer = (state = initialState, action) => {
+switch (action.type) {
+case ADD_TASK:
+return { ...state, task: [...state.task, action.payload] };
+
+    case DELETE_TASK:
+      const updatedTask = state.task.filter((currTask, idx) => {
+        return idx !== action.payload;
+      });
+      return { ...state, task: updatedTask };
+    default:
+      return state;
+
+}
+};
+
+// step-2: create Redux store using the reducer
+const store = createStore(taskReducer);
+console.log(store);
+// step-3: log the initial state
+// The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
+
+console.log("initial state:", store.getState());
+
+// step-4(old): dispatch an action to add a task.
+// store.dispatch({ type: ADD_TASK, payload: "Buy LocalStudio" });
+// console.log("updated state: ", store.getState());
+
+// store.dispatch({ type: ADD_TASK, payload: "Buy pdf" });
+// console.log("updated state: ", store.getState());
+
+// store.dispatch({ type: DELETE_TASK, payload: 1 });
+// console.log("deleted state: ", store.getState());
+
+//step-5: create action creators
+
+const addTask = (data) => {
+return { type: ADD_TASK, payload: data };
+};
+// step-4(new): dispatch an action to add a task.
+
+store.dispatch(addTask("Buy LocalStudio"));
+console.log("updated state: ", store.getState());
+
+store.dispatch(addTask("Buy pdf"));
+console.log("updated state: ", store.getState());
+
+const deleteTask = (id) => {
+return { type: DELETE_TASK, payload: id };
+};
+
+store.dispatch(deleteTask(1));
+console.log("deleted state: ", store.getState());
+export default store;
+
+Connect React with Redux:
+
+To use Redux in a React app, we need to connect Redux's store and actions to React components. This allows components to access the global state and dispatch actions.
+
+steps to connect:
+step-1: install react-redux->
+npm install react-redux
+
+step-2: Wrap the app with provider:
+Use the provider component to pass the Redux store to the entire app.
+
+main.jsx:
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import App from "./App.jsx";
+import "./index.css";
+import "./store.jsx";
+import store from "./store.jsx";
+
+createRoot(document.getElementById("root")).render(
+<StrictMode>
+<Provider store={store}>
+<App />
+</Provider>
+</StrictMode>
+);
+
+store.jsx:
+export const store = createStore(taskReducer);

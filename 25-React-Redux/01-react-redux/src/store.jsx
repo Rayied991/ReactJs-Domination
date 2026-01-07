@@ -43,7 +43,7 @@ console.log("initial state:", store.getState());
 
 //step-5: create action creators
 
-const addTask = (data) => {
+export const addTask = (data) => {
   return { type: ADD_TASK, payload: data };
 };
 // step-4(new):  dispatch an action to add a task.
@@ -56,7 +56,7 @@ console.log("updated state: ", store.getState());
 store.dispatch(addTask("Buy pdf"));
 console.log("updated state: ", store.getState());
 
-const deleteTask = (id) => {
+export const deleteTask = (id) => {
   return { type: DELETE_TASK, payload: id };
 };
 

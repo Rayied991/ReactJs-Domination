@@ -14,6 +14,8 @@
 6. [Context API](#context-api)
 7. [Performance Optimization](#performance-optimization)
 8. [TanStack Query (React Query)](#tanstack-query-react-query)
+9. [Vitest Testing Guide for React](#vitest-testing-guide-for-react)
+10. [React Redux Documentation](#react-redux-documentation)
 
 ---
 
@@ -1317,186 +1319,224 @@ describe("useCounter", () => {
 - Use `screen.debug()` to see the current DOM state during debugging
 - Run tests in watch mode during development: `npm test -- --watch`
 
-React Redux:
-Why Redux:
-in small apps you can manage data using React's state.But as the app grows,it becomes tricky to pass data between many components.
+# React Redux Documentation
+
+## Why Redux?
+
+In small apps you can manage data using React's state. But as the app grows, it becomes tricky to pass data between many components.
 
 Redux solves this problem by creating a centralized store that holds all the data. This store can be accessed and updated by any part of the app.
 
-React Redux= context api + useReducer
+**React Redux = Context API + useReducer**
 
-![alt text](image.png)
+## What is Redux?
 
-What is Redux?
 Redux is a tool that helps manage data (also known as "state") in large React apps. It allows us to keep all our app's data in a single place, known as the Redux Store, making it easy to share and update data across different parts of the app.
 
-How Redux works?
-Store: This is where Redux keeps all your data.
-Action: This is an object, which tell the redux what to do (like adding a task).
-Reducers: How to do. It actually change the data in the store based on actions.
+## How Redux Works
 
-Store:
-The Redux store is lie a big box where all your application's data is kept safe. Everything you do with redux- whether adding,removing or updating data - goes throuh this store.
+- **Store**: This is where Redux keeps all your data.
+- **Action**: This is an object which tells Redux what to do (like adding a task).
+- **Reducers**: How to do. It actually changes the data in the store based on actions.
 
-Actions:
-This is an Object, which tell the Redux what to do (like adding a task).
+### Store
+
+The Redux store is like a big box where all your application's data is kept safe. Everything you do with Redux - whether adding, removing or updating data - goes through this store.
+
+### Actions
+
+This is an Object which tells Redux what to do (like adding a task).
+
+```javascript
 {
-type:"counter/add",
-payload:{
-incrementBy:10
+  type: "counter/add",
+  payload: {
+    incrementBy: 10
+  }
 }
-}
-payload[extra information]
+```
 
-Reducers:
-How to do.It actually change the data in the store based on the actions.
-export const CounterReducer=(state= initialState,action)=>{
-switch (action.type){
-case "counter/add":
-return
-{ ...state,value: state.value +Action.payload.incrementBy};
-default:
-return state;
+**payload**: extra information
 
-      }
+### Reducers
 
+How to do. It actually changes the data in the store based on the actions.
+
+```javascript
+export const CounterReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case "counter/add":
+      return { ...state, value: state.value + action.payload.incrementBy };
+    default:
+      return state;
+  }
 };
+```
 
-Redux Advantages:
--Centralized state management(Redux stores your app's state in one place, making it easier to manage and access data across components.)
--Global access(Any component can access and update the state without passing props down.)
--Predictable Updates:(State Changes are controlled and predictable using reducers.)
--DevTools(Powerful tools for debugging,inspecting stateand replaying actions.)
--Async Support(Middleware like Thunk or Saga handles async tasks,keeping the code clean.)
+## Redux Advantages
 
-Redux: Reducer Function
+- **Centralized state management**: Redux stores your app's state in one place, making it easier to manage and access data across components.
+- **Global access**: Any component can access and update the state without passing props down.
+- **Predictable Updates**: State changes are controlled and predictable using reducers.
+- **DevTools**: Powerful tools for debugging, inspecting state and replaying actions.
+- **Async Support**: Middleware like Thunk or Saga handles async tasks, keeping the code clean.
+
+## Redux: Reducer Function
 
 A reducer is a function that decides how the state should change based on the action. The reducer takes the current state and an action and returns a new state.
 
-A key thing to remember:
+### Key Things to Remember
 
 1. Reducers must always return a new state
-2. They should never modify the old state directly.
+2. They should never modify the old state directly
 
-Syntax: Reducer:
-function reducer(state=initialState,action){
+### Syntax: Reducer
 
+```javascript
+function reducer(state = initialState, action) {
+  // reducer logic
 }
+```
 
 The reducer takes two arguments:
-State: This is the current state.
-Action: This tells the reducer what to do . It has a type and sometimes a payload (which is the data).
-function reducer(state=initialState,action){
-switch(action.type){
-case 'ACTION_TYPE':
-return {...state,data: action.payload};
-default:
-return state;
 
+- **State**: This is the current state.
+- **Action**: This tells the reducer what to do. It has a type and sometimes a payload (which is the data).
+
+```javascript
+function reducer(state = initialState, action) {
+  switch (action.type) {
+    case "ACTION_TYPE":
+      return { ...state, data: action.payload };
+    default:
+      return state;
+  }
 }
-}
+```
 
 We use a switch statement to check the action's type. Based on the action type, the reducer updates the state.
 
-Best practices Reducer:
-const ACTION_TYPE : 'task/add
-function reducer(state= initialState, action){
-switch(action.type){
-case ACTION_TYPE:
-return {...state,data:Action.payload};
-}
-}
+### Best Practices for Reducers
 
-Action Types: Use a combination of the state domain(like task) and the event (like add), seperated by a slash. For example, task/add.
-Immutable state: Never directly change the state.Always return a new state object using ...state to copy the old state.
+```javascript
+const ACTION_TYPE = "task/add";
 
-store.jsx:
-/_ eslint-disable no-case-declarations _/
+function reducer(state = initialState, action) {
+  switch (action.type) {
+    case ACTION_TYPE:
+      return { ...state, data: action.payload };
+  }
+}
+```
+
+- **Action Types**: Use a combination of the state domain (like task) and the event (like add), separated by a slash. For example, `task/add`.
+- **Immutable state**: Never directly change the state. Always return a new state object using `...state` to copy the old state.
+
+### Example: store.jsx
+
+```javascript
+/* eslint-disable no-case-declarations */
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
+
 const initialState = {
-task: [],
+  task: [],
 };
+
 const taskReducer = (state = initialState, action) => {
-switch (action.type) {
-case ADD_TASK:
-return { ...state, task: [...state.task, action.payload] };
-
-    case DELETE_TASK:
-      const updatedTask = state.task.filter((currTask, idx) => {
-        return idx !== action.payload;
-      });
-      return { ...state, task: [...state.task, updatedTask] };
-    default:
-      return state;
-
-}
-};
-
-Redux store:
-
-The store is where Redux keeps all your app's data.
-
-It's like a database for your app, but its only for managing data in memory(not saving it permanently).
-
-Redux store- syntax:
-import {createStore} from "redux";
-const store=createStore(reducer);
-
-The createStore method creates the Redux store using a reducer function that handles how the state changes in response to actions.
-
-dispatch an Action:
-dispatch() is used to send actions to the Redux store. An action describes what change you want to make to the state(such as adding a task).
-
-store.dispatch({type: "ACTION_TYPE",payload: data});
-
-getState():
-getState() retrieves the current state of the Redux store.
-
-This is useful for accessing the state after it has been updated or to monitor changes.
-
-ex: check if deleted or not or added or not
-
-redux installation:
-npm i redux
-[now createStore is deprecated]
-
-store.jsx:
-import { createStore } from "redux";
-/_ eslint-disable no-case-declarations _/
-// define action types
-const ADD_TASK = "task/add";
-const DELETE_TASK = "task/delete";
-const initialState = {
-task: [],
-isLoading: false,
-};
-// step-1: create a simple reducer function
-const taskReducer = (state = initialState, action) => {
-switch (action.type) {
-case ADD_TASK:
-return { ...state, task: [...state.task, action.payload] };
+  switch (action.type) {
+    case ADD_TASK:
+      return { ...state, task: [...state.task, action.payload] };
 
     case DELETE_TASK:
       const updatedTask = state.task.filter((currTask, idx) => {
         return idx !== action.payload;
       });
       return { ...state, task: updatedTask };
+
     default:
       return state;
+  }
+};
+```
 
-}
+## Redux Store
+
+The store is where Redux keeps all your app's data. It's like a database for your app, but it's only for managing data in memory (not saving it permanently).
+
+### Redux Store - Syntax
+
+```javascript
+import { createStore } from "redux";
+const store = createStore(reducer);
+```
+
+The `createStore` method creates the Redux store using a reducer function that handles how the state changes in response to actions.
+
+### dispatch() an Action
+
+`dispatch()` is used to send actions to the Redux store. An action describes what change you want to make to the state (such as adding a task).
+
+```javascript
+store.dispatch({ type: "ACTION_TYPE", payload: data });
+```
+
+### getState()
+
+`getState()` retrieves the current state of the Redux store. This is useful for accessing the state after it has been updated or to monitor changes.
+
+Example: check if deleted or not, or added or not
+
+## Redux Installation
+
+```bash
+npm i redux
+```
+
+**Note**: `createStore` is now deprecated
+
+### Complete Example: store.jsx
+
+```javascript
+import { createStore } from "redux";
+/* eslint-disable no-case-declarations */
+
+// define action types
+const ADD_TASK = "task/add";
+const DELETE_TASK = "task/delete";
+
+const initialState = {
+  task: [],
+  isLoading: false,
+};
+
+// step-1: create a simple reducer function
+const taskReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ADD_TASK:
+      return { ...state, task: [...state.task, action.payload] };
+
+    case DELETE_TASK:
+      const updatedTask = state.task.filter((currTask, idx) => {
+        return idx !== action.payload;
+      });
+      return { ...state, task: updatedTask };
+
+    default:
+      return state;
+  }
 };
 
 // step-2: create Redux store using the reducer
 const store = createStore(taskReducer);
 console.log(store);
-// step-3: log the initial state
-// The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
 
+// step-3: log the initial state
+// The getState method is a synchronous function that returns the current state of Redux application.
+// It includes the entire state of the application, including reducers and their respective states.
 console.log("initial state:", store.getState());
 
-// step-4: dispatch an action to add a task.
+// step-4: dispatch an action to add a task
 store.dispatch({ type: ADD_TASK, payload: "Buy LocalStudio" });
 console.log("updated state: ", store.getState());
 
@@ -1505,75 +1545,87 @@ console.log("updated state: ", store.getState());
 
 store.dispatch({ type: DELETE_TASK, payload: 1 });
 console.log("deleted state: ", store.getState());
+```
 
-to use store:
-import in main.jsx->
+### To Use Store
+
+Import in `main.jsx`:
+
+```javascript
 import "./store.jsx";
+```
 
-Redux Action:
-An action is an object that tells Redux what we want to do. It must have a type property that describes the action.
-{type:"ACTION_TYPE",payload:data}
+## Redux Action
 
-Action Creator:
+An action is an object that tells Redux what we want to do. It must have a `type` property that describes the action.
 
-an action creator is a function that creates an action object. This makes it easier to create actions with different data.
+```javascript
+{ type: "ACTION_TYPE", payload: data }
+```
 
-function actionCreator(data){
-return {type:"ACTION_TYPE",payload:data};
+## Action Creator
+
+An action creator is a function that creates an action object. This makes it easier to create actions with different data.
+
+```javascript
+function actionCreator(data) {
+  return { type: "ACTION_TYPE", payload: data };
 }
+```
 
-easy to write code:
+### Easy to Write Code
+
+```javascript
 import { createStore } from "redux";
-/_ eslint-disable no-case-declarations _/
+/* eslint-disable no-case-declarations */
+
 // define action types
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
+
 const initialState = {
-task: [],
-isLoading: false,
+  task: [],
+  isLoading: false,
 };
+
 // step-1: create a simple reducer function
 const taskReducer = (state = initialState, action) => {
-switch (action.type) {
-case ADD_TASK:
-return { ...state, task: [...state.task, action.payload] };
+  switch (action.type) {
+    case ADD_TASK:
+      return { ...state, task: [...state.task, action.payload] };
 
     case DELETE_TASK:
       const updatedTask = state.task.filter((currTask, idx) => {
         return idx !== action.payload;
       });
       return { ...state, task: updatedTask };
+
     default:
       return state;
-
-}
+  }
 };
 
 // step-2: create Redux store using the reducer
 const store = createStore(taskReducer);
 console.log(store);
-// step-3: log the initial state
-// The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
 
+// step-3: log the initial state
 console.log("initial state:", store.getState());
 
-// step-4(old): dispatch an action to add a task.
+// step-4(old): dispatch an action to add a task
 // store.dispatch({ type: ADD_TASK, payload: "Buy LocalStudio" });
 // console.log("updated state: ", store.getState());
-
 // store.dispatch({ type: ADD_TASK, payload: "Buy pdf" });
 // console.log("updated state: ", store.getState());
-
 // store.dispatch({ type: DELETE_TASK, payload: 1 });
 // console.log("deleted state: ", store.getState());
 
-//step-5: create action creators
-
+// step-5: create action creators
 const addTask = (data) => {
-return { type: ADD_TASK, payload: data };
+  return { type: ADD_TASK, payload: data };
 };
-// step-4(new): dispatch an action to add a task.
 
+// step-4(new): dispatch an action to add a task
 store.dispatch(addTask("Buy LocalStudio"));
 console.log("updated state: ", store.getState());
 
@@ -1581,25 +1633,34 @@ store.dispatch(addTask("Buy pdf"));
 console.log("updated state: ", store.getState());
 
 const deleteTask = (id) => {
-return { type: DELETE_TASK, payload: id };
+  return { type: DELETE_TASK, payload: id };
 };
 
 store.dispatch(deleteTask(1));
 console.log("deleted state: ", store.getState());
-export default store;
 
-Connect React with Redux:
+export default store;
+```
+
+## Connect React with Redux
 
 To use Redux in a React app, we need to connect Redux's store and actions to React components. This allows components to access the global state and dispatch actions.
 
-steps to connect:
-step-1: install react-redux->
+### Steps to Connect
+
+#### Step 1: Install react-redux
+
+```bash
 npm install react-redux
+```
 
-step-2: Wrap the app with provider:
-Use the provider component to pass the Redux store to the entire app.
+#### Step 2: Wrap the App with Provider
 
-main.jsx:
+Use the `Provider` component to pass the Redux store to the entire app.
+
+**main.jsx:**
+
+```javascript
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
@@ -1609,156 +1670,250 @@ import "./store.jsx";
 import store from "./store.jsx";
 
 createRoot(document.getElementById("root")).render(
-<StrictMode>
-<Provider store={store}>
-<App />
-</Provider>
-</StrictMode>
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>
 );
+```
 
-store.jsx:
+**store.jsx:**
+
+```javascript
 export const store = createStore(taskReducer);
+```
 
-Access Redux State in React using useSelector:
-Use the useSelector hook to read data from the Redux store.
-const count=useSelector(state=>state.property);
+## Access Redux State in React using useSelector
 
-Selector function: We define a selector function that takes the entire Redux store state as an argument and returns the specific piece of data we need.
+Use the `useSelector` hook to read data from the Redux store.
 
-Todo.jsx:
+```javascript
+const count = useSelector((state) => state.property);
+```
+
+**Selector function**: We define a selector function that takes the entire Redux store state as an argument and returns the specific piece of data we need.
+
+### Example: Todo.jsx
+
+```javascript
 import { MdDeleteForever } from "react-icons/md";
 import { useSelector } from "react-redux";
+
 const Todo = () => {
-const tasks = useSelector((state) => state.task);
-// console.log(state.task);
+  const tasks = useSelector((state) => state.task);
 
-const handleTaskDelete = (idx) => {};
-return (
-<>
+  const handleTaskDelete = (idx) => {};
 
-<div className="container">
-<div className="todo-app">
-<h1>
-<i className="fa-regular fa-pen-to-square"></i>To-do List:
-</h1>
-<div className="row">
-<form>
-<input type="text" id="input-box" placeholder="Add a new Task" />
-<button>Add Task</button>
-</form>
-</div>
-<ul id="list-container">
-{tasks.map((curTask, idx) => {
-return (
-<li key={idx}>
-<p>
-{idx + 1}:{curTask}
-</p>
-<div>
-<MdDeleteForever
-className="icon-style"
-onClick={() => handleTaskDelete(idx)}
-/>
-</div>
-</li>
-);
-})}
-</ul>
-</div>
-</div>
-</>
-);
+  return (
+    <>
+      <div className="container">
+        <div className="todo-app">
+          <h1>
+            <i className="fa-regular fa-pen-to-square"></i>To-do List:
+          </h1>
+          <div className="row">
+            <form>
+              <input type="text" id="input-box" placeholder="Add a new Task" />
+              <button>Add Task</button>
+            </form>
+          </div>
+          <ul id="list-container">
+            {tasks.map((curTask, idx) => {
+              return (
+                <li key={idx}>
+                  <p>
+                    {idx + 1}: {curTask}
+                  </p>
+                  <div>
+                    <MdDeleteForever
+                      className="icon-style"
+                      onClick={() => handleTaskDelete(idx)}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Todo;
+```
 
-store.jsx:
+**store.jsx:**
+
+```javascript
 store.dispatch(addTask("Buy LocalStudio"));
 store.dispatch(addTask("Buy Tesla"));
 store.dispatch(addTask("Buy Youtube"));
+```
 
-Dispatch Actions in React using useDispatch:
-Use the useDispatch hook to dispatch actions from a React component.
+## Dispatch Actions in React using useDispatch
 
-Todo.jsx:
+Use the `useDispatch` hook to dispatch actions from a React component.
+
+### Example: Todo.jsx
+
+```javascript
 import { useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { addTask, deleteTask } from "../store";
+
 const Todo = () => {
-const [task, setTask] = useState("");
-const tasks = useSelector((state) => state.task);
+  const [task, setTask] = useState("");
+  const tasks = useSelector((state) => state.task);
 
-const dispatch = useDispatch();
-const handleTaskDelete = (id) => {
-return dispatch(deleteTask(id));
-};
-const handleFormSubmit = (e) => {
-e.preventDefault();
-dispatch(addTask(task));
-return setTask("");
-};
-return (
-<>
+  const dispatch = useDispatch();
 
-<div className="container">
-<div className="todo-app">
-<h1>
-<i className="fa-regular fa-pen-to-square"></i>To-do List:
-</h1>
-<div className="row">
-<form onSubmit={handleFormSubmit}>
-<input
-type="text"
-id="input-box"
-placeholder="Add a new Task"
-value={task}
-onChange={(e) => setTask(e.target.value)}
-/>
-<button>Add Task</button>
-</form>
-</div>
-<ul id="list-container">
-{tasks.map((curTask, idx) => {
-return (
-<li key={idx}>
-<p>
-{idx + 1}:{curTask}
-</p>
-<div>
-<MdDeleteForever
-className="icon-style"
-onClick={() => handleTaskDelete(idx)}
-/>
-</div>
-</li>
-);
-})}
-</ul>
-</div>
-</div>
-</>
-);
+  const handleTaskDelete = (id) => {
+    return dispatch(deleteTask(id));
+  };
+
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addTask(task));
+    return setTask("");
+  };
+
+  return (
+    <>
+      <div className="container">
+        <div className="todo-app">
+          <h1>
+            <i className="fa-regular fa-pen-to-square"></i>To-do List:
+          </h1>
+          <div className="row">
+            <form onSubmit={handleFormSubmit}>
+              <input
+                type="text"
+                id="input-box"
+                placeholder="Add a new Task"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+              />
+              <button>Add Task</button>
+            </form>
+          </div>
+          <ul id="list-container">
+            {tasks.map((curTask, idx) => {
+              return (
+                <li key={idx}>
+                  <p>
+                    {idx + 1}: {curTask}
+                  </p>
+                  <div>
+                    <MdDeleteForever
+                      className="icon-style"
+                      onClick={() => handleTaskDelete(idx)}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Todo;
+```
 
-store.jsx:
+**store.jsx:**
+
+```javascript
 export const addTask = (data) => {
-return { type: ADD_TASK, payload: data };
+  return { type: ADD_TASK, payload: data };
 };
+
 export const deleteTask = (id) => {
-return { type: DELETE_TASK, payload: id };
+  return { type: DELETE_TASK, payload: id };
 };
+```
 
-Installation Redux DevTools:
-link: https://chromewebstore.google.com/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en
+## Installation Redux DevTools
 
+**Link**: [Redux DevTools Chrome Extension](https://chromewebstore.google.com/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en)
+
+```bash
 npm i @redux-devtools/extension
+```
 
-we will use middleware
-store.jsx:
+**store.jsx:**
+
+```javascript
 import { composeWithDevTools } from "@redux-devtools/extension";
 
 export const store = createStore(taskReducer, composeWithDevTools());
+```
 
+## Redux Thunk in React
+
+Redux Thunk is middleware that allows you to write action creators that return a function instead of an action (action means pure object). This function can perform asynchronous logic (like API requests) and dispatch actions after the operation is complete (e.g., fetching tasks and then dispatching them to the store).
+
+When you return a function from an action creator, Redux Thunk provides the dispatch function as an argument. This allows you to manually dispatch other actions (e.g., when an API call succeeds or fails).
+
+### Install Redux-Thunk
+
+```bash
+npm i redux-thunk
+```
+
+### Example: store.jsx
+
+```javascript
+import { composeWithDevTools } from "@redux-devtools/extension";
+import { applyMiddleware, createStore } from "redux";
+import { thunk } from "redux-thunk";
+
+const FETCH_TASK = "task/fetch";
+
+const taskReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case ADD_TASK:
+      return { ...state, task: [...state.task, action.payload] };
+
+    case DELETE_TASK:
+      const updatedTask = state.task.filter((currTask, idx) => {
+        return idx !== action.payload;
+      });
+      return { ...state, task: updatedTask };
+
+    case FETCH_TASK:
+      return { ...state, task: [...state.task, ...action.payload] };
+
+    default:
+      return state;
+  }
+};
+
+export const store = createStore(
+  taskReducer,
+  composeWithDevTools(applyMiddleware(thunk))
+);
+
+// middleware
+export const fetchTask = () => {
+  return async (dispatch) => {
+    try {
+      const res = await fetch(
+        "https://jsonplaceholder.typicode.com/todos?_limit=3"
+      );
+      const task = await res.json();
+      console.log(task);
+      dispatch({
+        type: FETCH_TASK,
+        payload: task.map((curTask) => curTask.title),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};
+```

@@ -1,9 +1,13 @@
 import { composeWithDevTools } from "@redux-devtools/extension";
-import { createStore } from "redux";
+import { applyMiddleware, createStore } from "redux";
+import { thunk } from "redux-thunk";
 /* eslint-disable no-case-declarations */
 // define action types
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
+const FETCH_TASK = "task/fetch";
+
+//define initial state
 const initialState = {
   task: [],
   isLoading: false,
@@ -19,13 +23,20 @@ const taskReducer = (state = initialState, action) => {
         return idx !== action.payload;
       });
       return { ...state, task: updatedTask };
+
+    case FETCH_TASK:
+      return { ...state, task: [...state.task, ...action.payload] };
+
     default:
       return state;
   }
 };
 
 // step-2: create Redux store using the reducer
-export const store = createStore(taskReducer, composeWithDevTools());
+export const store = createStore(
+  taskReducer,
+  composeWithDevTools(applyMiddleware(thunk))
+);
 console.log(store);
 // step-3: log the initial state
 // The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
@@ -63,3 +74,22 @@ export const deleteTask = (id) => {
 
 store.dispatch(deleteTask(1));
 console.log("deleted state: ", store.getState());
+
+// middleware
+export const fetchTask = () => {
+  return async (dispatch) => {
+    try {
+      const res = await fetch(
+        "https://jsonplaceholder.typicode.com/todos?_limit=3"
+      );
+      const task = await res.json();
+      // console.log(task);
+      dispatch({
+        type: FETCH_TASK,
+        payload: task.map((curTask) => curTask.title),
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+};

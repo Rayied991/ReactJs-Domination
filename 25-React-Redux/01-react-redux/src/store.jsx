@@ -1,3 +1,4 @@
+import { composeWithDevTools } from "@redux-devtools/extension";
 import { createStore } from "redux";
 /* eslint-disable no-case-declarations */
 // define action types
@@ -24,7 +25,7 @@ const taskReducer = (state = initialState, action) => {
 };
 
 // step-2: create Redux store using the reducer
-export const store = createStore(taskReducer);
+export const store = createStore(taskReducer, composeWithDevTools());
 console.log(store);
 // step-3: log the initial state
 // The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.

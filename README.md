@@ -1755,3 +1755,10 @@ Installation Redux DevTools:
 link: https://chromewebstore.google.com/detail/redux-devtools/lmhkpmbekcpmknklioeibfkpmmfibljd?hl=en
 
 npm i @redux-devtools/extension
+
+we will use middleware
+store.jsx:
+import { composeWithDevTools } from "@redux-devtools/extension";
+
+export const store = createStore(taskReducer, composeWithDevTools());
+

@@ -1618,3 +1618,63 @@ createRoot(document.getElementById("root")).render(
 
 store.jsx:
 export const store = createStore(taskReducer);
+
+Access Redux State in React using useSelector:
+Use the useSelector hook to read data from the Redux store.
+const count=useSelector(state=>state.property);
+
+Selector function: We define a selector function that takes the entire Redux store state as an argument and returns the specific piece of data we need.
+
+Todo.jsx:
+import { MdDeleteForever } from "react-icons/md";
+import { useSelector } from "react-redux";
+const Todo = () => {
+const tasks = useSelector((state) => state.task);
+// console.log(state.task);
+
+const handleTaskDelete = (idx) => {};
+return (
+<>
+
+<div className="container">
+<div className="todo-app">
+<h1>
+<i className="fa-regular fa-pen-to-square"></i>To-do List:
+</h1>
+<div className="row">
+<form>
+<input type="text" id="input-box" placeholder="Add a new Task" />
+<button>Add Task</button>
+</form>
+</div>
+<ul id="list-container">
+{tasks.map((curTask, idx) => {
+return (
+<li key={idx}>
+<p>
+{idx + 1}:{curTask}
+</p>
+<div>
+<MdDeleteForever
+className="icon-style"
+onClick={() => handleTaskDelete(idx)}
+/>
+</div>
+</li>
+);
+})}
+</ul>
+</div>
+</div>
+</>
+);
+};
+
+export default Todo;
+
+store.jsx:
+store.dispatch(addTask("Buy LocalStudio"));
+store.dispatch(addTask("Buy Tesla"));
+store.dispatch(addTask("Buy Youtube"));
+
+Dispatch an Action -Redux:

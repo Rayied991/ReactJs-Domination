@@ -49,6 +49,8 @@ const addTask = (data) => {
 // step-4(new):  dispatch an action to add a task.
 
 store.dispatch(addTask("Buy LocalStudio"));
+store.dispatch(addTask("Buy Tesla"));
+store.dispatch(addTask("Buy Youtube"));
 console.log("updated state: ", store.getState());
 
 store.dispatch(addTask("Buy pdf"));

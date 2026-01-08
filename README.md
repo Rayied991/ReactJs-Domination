@@ -1917,3 +1917,14 @@ export const fetchTask = () => {
   };
 };
 ```
+
+Which one you select?
+1.React-Redux
+2.Redux Toolkit
+Redux Toolkit:
+What is Redux Toolkit?
+Redux Toolkit(RTK) is an official toolset from the Redux Team that makes working with Redux easier and less time-consuming.
+
+Instead of doing everything manually-- like creating actions,reducers and managing state immutability -- RTK gives you build-in functions that handle most of that work for you.
+
+In simpler terms, it's a shortcut that helps you manage your app's state with less code and fewer mistakes. THe goal is to make Redux more beginner-friendly to reduce the amount of code you need to write.

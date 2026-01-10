@@ -1928,3 +1928,70 @@ Redux Toolkit(RTK) is an official toolset from the Redux Team that makes working
 Instead of doing everything manually-- like creating actions,reducers and managing state immutability -- RTK gives you build-in functions that handle most of that work for you.
 
 In simpler terms, it's a shortcut that helps you manage your app's state with less code and fewer mistakes. THe goal is to make Redux more beginner-friendly to reduce the amount of code you need to write.
+
+Why Redux Toolkit:
+
+- Less Boilerplate:
+  In traditional Redux, you write a lot of repititive code just to get basic things done. RTK cuts down on all that extra code and gives you a cleaner,simpler way to manage state.
+- Simpler Setup:
+  It also automatically sets up your store, adds some middleware for things like async actions and even connects you to Redux Devtools for debugging without extra configuration.
+- Built-in Async Handling:
+  if you've ever used Redux Thunk for async tasks like fetching data from an API. RTK has a built-in feature called createAsyncThunk that makes it even easier to handle async actions.
+
+Advantages:
+
+- Less Boilerplate Code:
+  Normally, with Redux, you need to write action types,action creators and reducers seperately. With RTK's createSlice, you can handle all of this in one place, in fewer lines of code.
+
+- Easier to work with State:
+  RTK uses a tool called Immer(Library) under the hood, which allows you to write state changes like you're mutating the state directly, but it still follows Redux's rule of immutability (not changing the original state).
+
+- Better Async Logic:
+  Handling async tasks, like fetching data, is much simpler with RTK createAsyncThunk. It automatically handles loading,success and error states for you, so you don't have to write all that manually.
+
+- Great Defaults:
+  RTK sets up Redux DevTools,middleware and other configuration for you, so you can focus on building your app instead of setup.
+
+RTK is an helper function of Redux React.
+
+# Redux:
+
+//action types
+const INCREMENT="INCREMENT";
+
+//action creators
+const increment=() ({type: INCREMENT,});
+
+//initial state
+const initialState={value:0};
+
+function counterReducer(state=initialState,action){
+switch(action.type){
+case INCREMENT:
+return {
+...state, // copying the prevous state
+value:state.value+1, //updating value
+};
+default:
+return state;
+
+}
+}
+
+# Redux Toolkit:
+
+import { createSlice } from "@reduxjs/toolkit";
+
+const counterSlice=createSlice({
+name:"counter",
+initialState:{value:0},
+reducers:{
+increment(state){
+state.value+=1;//but Immer handles immutability behind the scenes
+},
+},
+});
+
+export const { increment } = counterSlice.actions;
+
+export default counterSlice.reducer;

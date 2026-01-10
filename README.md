@@ -1995,3 +1995,25 @@ state.value+=1;//but Immer handles immutability behind the scenes
 export const { increment } = counterSlice.actions;
 
 export default counterSlice.reducer;
+
+installation:
+npm i @reduxjs/toolkit
+
+RTK store:
+configureStore & useSelector:
+
+//! (old style) step-2: create Redux store using the reducer
+// export const store = createStore(
+// taskReducer,
+// composeWithDevTools(applyMiddleware(thunk))
+// );
+// console.log(store);
+
+import { configureStore } from "@reduxjs/toolkit";
+//! (New style) step-2
+export const store = configureStore({
+reducer: {
+// taskReducer: taskReducer,
+taskReducer,
+},
+});

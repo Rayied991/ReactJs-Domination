@@ -2027,3 +2027,59 @@ A slice is essentially a section of the Redux state, along with the actions and 
 - The initial state of the slice.
 - Reducers that define how the state changes in response to actions.
 - Action creators automatically generated based on reducer names.
+
+store.jsx:
+import { createSlice } from "@reduxjs/toolkit";
+
+// ? RTK slice
+const taskReducer = createSlice({
+name: "task",
+// initialState: initialState,
+initialState,
+reducers: {
+// here by default are action creators
+addTask(state, action) {},
+deleteTask(state, action) {},
+},
+});
+// console.log("New slice", taskReducer);
+
+const { addTask, deleteTask } = taskReducer.actions;
+
+Perform add and delete task:
+store.jsx->
+// ? RTK slice
+const taskReducer = createSlice({
+name: "task",
+// initialState: initialState,
+initialState,
+reducers: {
+// here by default are action creators
+addTask(state, action) {
+// now we can mutate the data
+state.task.push(action.payload);
+// state.task=[...state.task,action.payload];
+},
+deleteTask(state, action) {
+state.task = state.task.filter((curTask, idx) => {
+return idx !== action.payload;
+});
+},
+},
+});
+// console.log("New slice", taskReducer);
+
+export const { addTask, deleteTask } = taskReducer.actions;
+
+export const store = configureStore({
+reducer: {
+// taskReducer: taskReducer,
+taskReducer: taskReducer.reducer,
+},
+});
+
+//!(new style) Step-3: Log the initial state
+console.log("Initial state:", store.getState());
+//!(new style) step-4: dispatch an action to add a task.
+console.log(store.dispatch(addTask("Buy LocalStudio")));
+console.log(store.dispatch(addTask("Buy PDF")));

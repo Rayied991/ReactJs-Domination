@@ -44,26 +44,40 @@ const taskReducer = createSlice({
   initialState,
   reducers: {
     // here by default are action creators
-    addTask(state, action) {},
-    deleteTask(state, action) {},
+    addTask(state, action) {
+      // now we can mutate the data
+      state.task.push(action.payload);
+      // state.task=[...state.task,action.payload];
+    },
+    deleteTask(state, action) {
+      state.task = state.task.filter((curTask, idx) => {
+        return idx !== action.payload;
+      });
+    },
   },
 });
 // console.log("New slice", taskReducer);
 
-const { addTask, deleteTask } = taskReducer.actions;
+export const { addTask, deleteTask } = taskReducer.actions;
 
 //! (New style) step-2
 export const store = configureStore({
   reducer: {
     // taskReducer: taskReducer,
-    taskReducer,
+    taskReducer: taskReducer.reducer,
   },
 });
+
+//!(new style) Step-3: Log the initial state
+console.log("Initial state:", store.getState());
+//!(new style) step-4:  dispatch an action to add a task.
+console.log(store.dispatch(addTask("Buy LocalStudio")));
+console.log(store.dispatch(addTask("Buy PDF")));
 
 // step-3: log the initial state
 // The getState method is a synchronous function that returns the current state of Redux application. It incldes the entire state of the application, including reducers and their respective states.
 
-console.log("initial state:", store.getState());
+// console.log("initial state:", store.getState());
 
 // step-4(old):  dispatch an action to add a task.
 // store.dispatch({ type: ADD_TASK, payload: "Buy LocalStudio" });

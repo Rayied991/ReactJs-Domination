@@ -16,6 +16,7 @@
 8. [TanStack Query (React Query)](#tanstack-query-react-query)
 9. [Vitest Testing Guide for React](#vitest-testing-guide-for-react)
 10. [React Redux Documentation](#react-redux-documentation)
+11. [Redux Toolkit Complete Guide](#redux-toolkit-complete-guide)
 
 ---
 
@@ -1918,180 +1919,242 @@ export const fetchTask = () => {
 };
 ```
 
-Which one you select?
-1.React-Redux
-2.Redux Toolkit
-Redux Toolkit:
-What is Redux Toolkit?
-Redux Toolkit(RTK) is an official toolset from the Redux Team that makes working with Redux easier and less time-consuming.
+# Redux Toolkit Complete Guide
 
-Instead of doing everything manually-- like creating actions,reducers and managing state immutability -- RTK gives you build-in functions that handle most of that work for you.
+## Which one to select?
 
-In simpler terms, it's a shortcut that helps you manage your app's state with less code and fewer mistakes. THe goal is to make Redux more beginner-friendly to reduce the amount of code you need to write.
+1. React-Redux
+2. Redux Toolkit ✅
 
-Why Redux Toolkit:
+---
 
-- Less Boilerplate:
-  In traditional Redux, you write a lot of repititive code just to get basic things done. RTK cuts down on all that extra code and gives you a cleaner,simpler way to manage state.
-- Simpler Setup:
-  It also automatically sets up your store, adds some middleware for things like async actions and even connects you to Redux Devtools for debugging without extra configuration.
-- Built-in Async Handling:
-  if you've ever used Redux Thunk for async tasks like fetching data from an API. RTK has a built-in feature called createAsyncThunk that makes it even easier to handle async actions.
+## What is Redux Toolkit?
 
-Advantages:
+**Redux Toolkit (RTK)** is an official toolset from the Redux Team that makes working with Redux easier and less time-consuming.
 
-- Less Boilerplate Code:
-  Normally, with Redux, you need to write action types,action creators and reducers seperately. With RTK's createSlice, you can handle all of this in one place, in fewer lines of code.
+Instead of doing everything manually—like creating actions, reducers and managing state immutability—RTK gives you built-in functions that handle most of that work for you.
 
-- Easier to work with State:
-  RTK uses a tool called Immer(Library) under the hood, which allows you to write state changes like you're mutating the state directly, but it still follows Redux's rule of immutability (not changing the original state).
+**In simpler terms:** It's a shortcut that helps you manage your app's state with less code and fewer mistakes. The goal is to make Redux more beginner-friendly and reduce the amount of code you need to write.
 
-- Better Async Logic:
-  Handling async tasks, like fetching data, is much simpler with RTK createAsyncThunk. It automatically handles loading,success and error states for you, so you don't have to write all that manually.
+---
 
-- Great Defaults:
-  RTK sets up Redux DevTools,middleware and other configuration for you, so you can focus on building your app instead of setup.
+## Why Redux Toolkit?
 
-RTK is an helper function of Redux React.
+### Less Boilerplate
 
-# Redux:
+In traditional Redux, you write a lot of repetitive code just to get basic things done. RTK cuts down on all that extra code and gives you a cleaner, simpler way to manage state.
 
-//action types
-const INCREMENT="INCREMENT";
+### Simpler Setup
 
-//action creators
-const increment=() ({type: INCREMENT,});
+It automatically sets up your store, adds middleware for things like async actions, and even connects you to Redux DevTools for debugging without extra configuration.
 
-//initial state
-const initialState={value:0};
+### Built-in Async Handling
 
-function counterReducer(state=initialState,action){
-switch(action.type){
-case INCREMENT:
-return {
-...state, // copying the prevous state
-value:state.value+1, //updating value
-};
-default:
-return state;
+If you've ever used Redux Thunk for async tasks like fetching data from an API, RTK has a built-in feature called `createAsyncThunk` that makes it even easier to handle async actions.
 
+---
+
+## Advantages
+
+### Less Boilerplate Code
+
+Normally, with Redux, you need to write action types, action creators, and reducers separately. With RTK's `createSlice`, you can handle all of this in one place, in fewer lines of code.
+
+### Easier to Work with State
+
+RTK uses a tool called **Immer** (library) under the hood, which allows you to write state changes like you're mutating the state directly, but it still follows Redux's rule of immutability (not changing the original state).
+
+### Better Async Logic
+
+Handling async tasks, like fetching data, is much simpler with RTK's `createAsyncThunk`. It automatically handles loading, success, and error states for you, so you don't have to write all that manually.
+
+### Great Defaults
+
+RTK sets up Redux DevTools, middleware, and other configuration for you, so you can focus on building your app instead of setup.
+
+> **Note:** RTK is a helper function of Redux React.
+
+---
+
+## Comparison: Redux vs Redux Toolkit
+
+### Traditional Redux
+
+```javascript
+// Action types
+const INCREMENT = "INCREMENT";
+
+// Action creators
+const increment = () => ({ type: INCREMENT });
+
+// Initial state
+const initialState = { value: 0 };
+
+function counterReducer(state = initialState, action) {
+  switch (action.type) {
+    case INCREMENT:
+      return {
+        ...state, // copying the previous state
+        value: state.value + 1, // updating value
+      };
+    default:
+      return state;
+  }
 }
-}
+```
 
-# Redux Toolkit:
+### Redux Toolkit
 
+```javascript
 import { createSlice } from "@reduxjs/toolkit";
 
-const counterSlice=createSlice({
-name:"counter",
-initialState:{value:0},
-reducers:{
-increment(state){
-state.value+=1;//but Immer handles immutability behind the scenes
-},
-},
+const counterSlice = createSlice({
+  name: "counter",
+  initialState: { value: 0 },
+  reducers: {
+    increment(state) {
+      state.value += 1; // Immer handles immutability behind the scenes
+    },
+  },
 });
 
 export const { increment } = counterSlice.actions;
-
 export default counterSlice.reducer;
+```
 
-installation:
+---
+
+## Installation
+
+```bash
 npm i @reduxjs/toolkit
+```
 
-RTK store:
-configureStore & useSelector:
+---
 
-//! (old style) step-2: create Redux store using the reducer
-// export const store = createStore(
-// taskReducer,
-// composeWithDevTools(applyMiddleware(thunk))
-// );
-// console.log(store);
+## RTK Store: configureStore & useSelector
 
+### Old Style (Traditional Redux)
+
+```javascript
+// Step-2: create Redux store using the reducer
+export const store = createStore(
+  taskReducer,
+  composeWithDevTools(applyMiddleware(thunk))
+);
+```
+
+### New Style (Redux Toolkit)
+
+```javascript
 import { configureStore } from "@reduxjs/toolkit";
-//! (New style) step-2
+
+// Step-2: Create store with configureStore
 export const store = configureStore({
-reducer: {
-// taskReducer: taskReducer,
-taskReducer,
-},
+  reducer: {
+    taskReducer,
+  },
 });
+```
 
-# RTK createSlice:
+---
 
-In Redux Toolkit(RTK), createSlice is a utility function that simplifies the process of creating a Redux slice of state. It combines actions and reducers into a single object, making the setup of Redux state management more streamlined and organized.
+## RTK createSlice
 
-A slice is essentially a section of the Redux state, along with the actions and reducers that operate on it. Using createSlce, you can define:
+In Redux Toolkit (RTK), `createSlice` is a utility function that simplifies the process of creating a Redux slice of state. It combines actions and reducers into a single object, making the setup of Redux state management more streamlined and organized.
 
-- The initial state of the slice.
-- Reducers that define how the state changes in response to actions.
-- Action creators automatically generated based on reducer names.
+**A slice** is essentially a section of the Redux state, along with the actions and reducers that operate on it.
 
-store.jsx:
+### Using createSlice, you can define:
+
+- The initial state of the slice
+- Reducers that define how the state changes in response to actions
+- Action creators automatically generated based on reducer names
+
+### Basic Example
+
+```javascript
 import { createSlice } from "@reduxjs/toolkit";
 
-// ? RTK slice
+// RTK slice
 const taskReducer = createSlice({
-name: "task",
-// initialState: initialState,
-initialState,
-reducers: {
-// here by default are action creators
-addTask(state, action) {},
-deleteTask(state, action) {},
-},
+  name: "task",
+  initialState,
+  reducers: {
+    // Here by default are action creators
+    addTask(state, action) {},
+    deleteTask(state, action) {},
+  },
 });
-// console.log("New slice", taskReducer);
 
 const { addTask, deleteTask } = taskReducer.actions;
+```
 
-Perform add and delete task:
-store.jsx->
-// ? RTK slice
+---
+
+## Perform Add and Delete Task
+
+### store.jsx
+
+```javascript
+import { createSlice, configureStore } from "@reduxjs/toolkit";
+
+const initialState = {
+  task: [],
+};
+
+// RTK slice
 const taskReducer = createSlice({
-name: "task",
-// initialState: initialState,
-initialState,
-reducers: {
-// here by default are action creators
-addTask(state, action) {
-// now we can mutate the data
-state.task.push(action.payload);
-// state.task=[...state.task,action.payload];
-},
-deleteTask(state, action) {
-state.task = state.task.filter((curTask, idx) => {
-return idx !== action.payload;
+  name: "task",
+  initialState,
+  reducers: {
+    // Here by default are action creators
+    addTask(state, action) {
+      // Now we can mutate the data
+      state.task.push(action.payload);
+      // state.task = [...state.task, action.payload];
+    },
+    deleteTask(state, action) {
+      state.task = state.task.filter((curTask, idx) => {
+        return idx !== action.payload;
+      });
+    },
+  },
 });
-},
-},
-});
-// console.log("New slice", taskReducer);
 
 export const { addTask, deleteTask } = taskReducer.actions;
 
 export const store = configureStore({
-reducer: {
-// taskReducer: taskReducer,
-taskReducer: taskReducer.reducer,
-},
+  reducer: {
+    taskReducer: taskReducer.reducer,
+  },
 });
 
-//!(new style) Step-3: Log the initial state
+// (New style) Step-3: Log the initial state
 console.log("Initial state:", store.getState());
-//!(new style) step-4: dispatch an action to add a task.
+
+// (New style) Step-4: Dispatch an action to add a task
 console.log(store.dispatch(addTask("Buy LocalStudio")));
 console.log(store.dispatch(addTask("Buy PDF")));
+```
 
-Connect React+ Redux Toolkit:
+---
 
-step-1:npm install react-redux
+## Connect React + Redux Toolkit
 
-step-2:wrap app with provider:
-Use the Provider component to pass the Redux store to the entire app.
+### Step 1: Install react-redux
 
-main.jsx:
+```bash
+npm install react-redux
+```
+
+### Step 2: Wrap App with Provider
+
+Use the `Provider` component to pass the Redux store to the entire app.
+
+**main.jsx:**
+
+```javascript
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { Provider } from "react-redux";
@@ -2100,97 +2163,127 @@ import "./index.css";
 import { store } from "./store.jsx";
 
 createRoot(document.getElementById("root")).render(
-<StrictMode>
-<Provider store={store}>
-<App />
-</Provider>
-</StrictMode>
+  <StrictMode>
+    <Provider store={store}>
+      <App />
+    </Provider>
+  </StrictMode>
 );
+```
 
-Access Redux State in React using useSelector:
-Use the useSelector hook to read data from the Redux store.
+---
 
-const count=useSelector(state=>state.property)
+## Access Redux State in React using useSelector
 
-Selector function: We define a selector function that takes the entire Redux Toolkit store state as an argument and returns the specific piece of data we need.
+Use the `useSelector` hook to read data from the Redux store.
 
-dispatch an action:
-dispatch actions in React using useDispatch:
-Use the useDispatch hook to dispatch actions from a React component.
+```javascript
+const count = useSelector((state) => state.property);
+```
 
-todo.jsx->
+**Selector function:** We define a selector function that takes the entire Redux Toolkit store state as an argument and returns the specific piece of data we need.
+
+---
+
+## Dispatch an Action
+
+Dispatch actions in React using `useDispatch`. Use the `useDispatch` hook to dispatch actions from a React component.
+
+### todo.jsx
+
+```javascript
 import { useState } from "react";
 import { MdDeleteForever } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { addTask, deleteTask } from "../store";
+
 const Todo = () => {
-const [userTask, setUserTask] = useState("");
-const tasks = useSelector((state) => state.taskReducer.task);
-const dispatch = useDispatch();
+  const [userTask, setUserTask] = useState("");
+  const tasks = useSelector((state) => state.taskReducer.task);
+  const dispatch = useDispatch();
 
-const handleFormSubmit = (e) => {
-e.preventDefault();
-dispatch(addTask(userTask));
-setUserTask("");
-};
-const handleDeleteTask = (idx) => {
-return dispatch(deleteTask(idx));
-};
+  const handleFormSubmit = (e) => {
+    e.preventDefault();
+    dispatch(addTask(userTask));
+    setUserTask("");
+  };
 
-return (
-<>
+  const handleDeleteTask = (idx) => {
+    return dispatch(deleteTask(idx));
+  };
 
-<div className="container">
-<div className="todo-app">
-<h1>
-<i className="fa-regular fa-pen-to-square"></i>To-do List:
-</h1>
-<div className="row">
-<form onSubmit={handleFormSubmit}>
-<input
-type="text"
-id="input-box"
-placeholder="Add a new Task"
-value={userTask}
-onChange={(e) => setUserTask(e.target.value)}
-/>
-<button type="submit">Add Task</button>
-</form>
-</div>
-{/_ <button onClick={handleFetchTasks}>Fetch Tasks</button> _/}
-<ul id="list-container">
-{tasks?.map((curTask, idx) => {
-return (
-<li key={idx}>
-<p>
-{idx + 1}:{curTask}
-</p>
-<div>
-<MdDeleteForever
-className="icon-style"
-onClick={() => handleDeleteTask(idx)}
-/>
-</div>
-</li>
-);
-})}
-</ul>
-</div>
-</div>
-</>
-);
+  return (
+    <>
+      <div className="container">
+        <div className="todo-app">
+          <h1>
+            <i className="fa-regular fa-pen-to-square"></i>To-do List:
+          </h1>
+          <div className="row">
+            <form onSubmit={handleFormSubmit}>
+              <input
+                type="text"
+                id="input-box"
+                placeholder="Add a new Task"
+                value={userTask}
+                onChange={(e) => setUserTask(e.target.value)}
+              />
+              <button type="submit">Add Task</button>
+            </form>
+          </div>
+          <ul id="list-container">
+            {tasks?.map((curTask, idx) => {
+              return (
+                <li key={idx}>
+                  <p>
+                    {idx + 1}: {curTask}
+                  </p>
+                  <div>
+                    <MdDeleteForever
+                      className="icon-style"
+                      onClick={() => handleDeleteTask(idx)}
+                    />
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
+    </>
+  );
 };
 
 export default Todo;
+```
 
-RTK folder structure:
+---
+
+## RTK Folder Structure
+
+```
 src
-|--app
-| --store.js #Redux store configuration
-|--features
-| |--tasks
-| |--taskSlice.js #The tasks slice
-| |--taskActions.js # action creators(optional if needed sperately)
-| |--taskSelectors.js # selectors(if you have complex selectors)  
-| |--taskAPI.js # Async API calls(if using RTK query or other async logic)  
-|--index.js #Root entry file
+├── app
+│   └── store.js              # Redux store configuration
+├── features
+│   └── tasks
+│       ├── taskSlice.js      # The tasks slice
+│       ├── taskActions.js    # Action creators (optional if needed separately)
+│       ├── taskSelectors.js  # Selectors (if you have complex selectors)
+│       └── taskAPI.js        # Async API calls (if using RTK Query or other async logic)
+└── index.js                  # Root entry file
+```
+
+---
+
+## Summary
+
+Redux Toolkit simplifies Redux development by:
+
+- Reducing boilerplate code with `createSlice`
+- Automatically configuring the store with `configureStore`
+- Handling immutability with Immer
+- Providing built-in async handling with `createAsyncThunk`
+- Setting up Redux DevTools by default
+
+This makes it the recommended approach for all new Redux projects!

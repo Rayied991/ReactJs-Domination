@@ -2083,3 +2083,26 @@ console.log("Initial state:", store.getState());
 //!(new style) step-4: dispatch an action to add a task.
 console.log(store.dispatch(addTask("Buy LocalStudio")));
 console.log(store.dispatch(addTask("Buy PDF")));
+
+Connect React+ Redux Toolkit:
+
+step-1:npm install react-redux
+
+step-2:wrap app with provider:
+Use the Provider component to pass the Redux store to the entire app.
+
+main.jsx:
+import { StrictMode } from "react";
+import { createRoot } from "react-dom/client";
+import { Provider } from "react-redux";
+import App from "./App.jsx";
+import "./index.css";
+import { store } from "./store.jsx";
+
+createRoot(document.getElementById("root")).render(
+<StrictMode>
+<Provider store={store}>
+<App />
+</Provider>
+</StrictMode>
+);

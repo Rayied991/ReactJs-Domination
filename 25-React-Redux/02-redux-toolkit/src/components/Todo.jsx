@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { MdDeleteForever } from "react-icons/md";
 import { useDispatch, useSelector } from "react-redux";
 import { addTask, deleteTask, fetchTask } from "../store";
 const Todo = () => {
@@ -39,24 +38,8 @@ const Todo = () => {
               <button>Add Task</button>
             </form>
           </div>
-          <button onClick={handleFetchTasks}>Fetch Tasks</button>
-          <ul id="list-container">
-            {tasks.map((curTask, idx) => {
-              return (
-                <li key={idx}>
-                  <p>
-                    {idx + 1}:{curTask}
-                  </p>
-                  <div>
-                    <MdDeleteForever
-                      className="icon-style"
-                      onClick={() => handleTaskDelete(idx)}
-                    />
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+          {/* <button onClick={handleFetchTasks}>Fetch Tasks</button> */}
+          <ul id="list-container"></ul>
         </div>
       </div>
     </>

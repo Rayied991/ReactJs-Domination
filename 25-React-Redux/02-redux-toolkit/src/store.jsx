@@ -1,6 +1,5 @@
-import { configureStore } from "@reduxjs/toolkit";
+import { configureStore, createSlice } from "@reduxjs/toolkit";
 
-/* eslint-disable no-case-declarations */
 // define action types
 const ADD_TASK = "task/add";
 const DELETE_TASK = "task/delete";
@@ -12,24 +11,24 @@ const initialState = {
   isLoading: false,
 };
 // step-1: create a simple reducer function
-const taskReducer = (state = initialState, action) => {
-  switch (action.type) {
-    case ADD_TASK:
-      return { ...state, task: [...state.task, action.payload] };
+// const taskReducer = (state = initialState, action) => {
+//   switch (action.type) {
+//     case ADD_TASK:
+//       return { ...state, task: [...state.task, action.payload] };
 
-    case DELETE_TASK:
-      const updatedTask = state.task.filter((currTask, idx) => {
-        return idx !== action.payload;
-      });
-      return { ...state, task: updatedTask };
+//     case DELETE_TASK:
+//       const updatedTask = state.task.filter((currTask, idx) => {
+//         return idx !== action.payload;
+//       });
+//       return { ...state, task: updatedTask };
 
-    case FETCH_TASK:
-      return { ...state, task: [...state.task, ...action.payload] };
+//     case FETCH_TASK:
+//       return { ...state, task: [...state.task, ...action.payload] };
 
-    default:
-      return state;
-  }
-};
+//     default:
+//       return state;
+//   }
+// };
 
 //! (old style) step-2: create Redux store using the reducer
 // export const store = createStore(
@@ -37,6 +36,21 @@ const taskReducer = (state = initialState, action) => {
 //   composeWithDevTools(applyMiddleware(thunk))
 // );
 // console.log(store);
+
+// ? RTK slice
+const taskReducer = createSlice({
+  name: "task",
+  // initialState: initialState,
+  initialState,
+  reducers: {
+    // here by default are action creators
+    addTask(state, action) {},
+    deleteTask(state, action) {},
+  },
+});
+// console.log("New slice", taskReducer);
+
+const { addTask, deleteTask } = taskReducer.actions;
 
 //! (New style) step-2
 export const store = configureStore({
@@ -63,25 +77,25 @@ console.log("initial state:", store.getState());
 
 //step-5: create action creators
 
-export const addTask = (data) => {
-  return { type: ADD_TASK, payload: data };
-};
+// export const addTask = (data) => {
+//   return { type: ADD_TASK, payload: data };
+// };
 // step-4(new):  dispatch an action to add a task.
 
-store.dispatch(addTask("Buy LocalStudio"));
-store.dispatch(addTask("Buy Tesla"));
-store.dispatch(addTask("Buy Youtube"));
-console.log("updated state: ", store.getState());
+// store.dispatch(addTask("Buy LocalStudio"));
+// store.dispatch(addTask("Buy Tesla"));
+// store.dispatch(addTask("Buy Youtube"));
+// console.log("updated state: ", store.getState());
 
-store.dispatch(addTask("Buy pdf"));
-console.log("updated state: ", store.getState());
+// store.dispatch(addTask("Buy pdf"));
+// console.log("updated state: ", store.getState());
 
-export const deleteTask = (id) => {
-  return { type: DELETE_TASK, payload: id };
-};
+// export const deleteTask = (id) => {
+//   return { type: DELETE_TASK, payload: id };
+// };
 
-store.dispatch(deleteTask(1));
-console.log("deleted state: ", store.getState());
+// store.dispatch(deleteTask(1));
+// console.log("deleted state: ", store.getState());
 
 // middleware
 export const fetchTask = () => {

@@ -2017,3 +2017,13 @@ reducer: {
 taskReducer,
 },
 });
+
+# RTK createSlice:
+
+In Redux Toolkit(RTK), createSlice is a utility function that simplifies the process of creating a Redux slice of state. It combines actions and reducers into a single object, making the setup of Redux state management more streamlined and organized.
+
+A slice is essentially a section of the Redux state, along with the actions and reducers that operate on it. Using createSlce, you can define:
+
+- The initial state of the slice.
+- Reducers that define how the state changes in response to actions.
+- Action creators automatically generated based on reducer names.

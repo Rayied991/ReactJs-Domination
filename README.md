@@ -2106,3 +2106,10 @@ createRoot(document.getElementById("root")).render(
 </Provider>
 </StrictMode>
 );
+
+Access Redux State in React using useSelector:
+Use the useSelector hook to read data from the Redux store.
+
+const count=useSelector(state=>state.property)
+
+Selector function: We define a selector function that takes the entire Redux Toolkit store state as an argument and returns the specific piece of data we need.

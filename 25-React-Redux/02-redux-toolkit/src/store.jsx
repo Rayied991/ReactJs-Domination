@@ -47,6 +47,7 @@ console.log("Initial state:", store.getState());
 //!(new style) step-4:  dispatch an action to add a task.
 console.log(store.dispatch(addTask("Buy LocalStudio")));
 console.log(store.dispatch(addTask("Buy PDF")));
+// console.log(store.dispatch(deleteTask(1)));
 
 // middleware
 export const fetchTask = () => {

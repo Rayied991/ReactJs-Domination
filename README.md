@@ -2113,3 +2113,84 @@ Use the useSelector hook to read data from the Redux store.
 const count=useSelector(state=>state.property)
 
 Selector function: We define a selector function that takes the entire Redux Toolkit store state as an argument and returns the specific piece of data we need.
+
+dispatch an action:
+dispatch actions in React using useDispatch:
+Use the useDispatch hook to dispatch actions from a React component.
+
+todo.jsx->
+import { useState } from "react";
+import { MdDeleteForever } from "react-icons/md";
+import { useDispatch, useSelector } from "react-redux";
+import { addTask, deleteTask } from "../store";
+const Todo = () => {
+const [userTask, setUserTask] = useState("");
+const tasks = useSelector((state) => state.taskReducer.task);
+const dispatch = useDispatch();
+
+const handleFormSubmit = (e) => {
+e.preventDefault();
+dispatch(addTask(userTask));
+setUserTask("");
+};
+const handleDeleteTask = (idx) => {
+return dispatch(deleteTask(idx));
+};
+
+return (
+<>
+
+<div className="container">
+<div className="todo-app">
+<h1>
+<i className="fa-regular fa-pen-to-square"></i>To-do List:
+</h1>
+<div className="row">
+<form onSubmit={handleFormSubmit}>
+<input
+type="text"
+id="input-box"
+placeholder="Add a new Task"
+value={userTask}
+onChange={(e) => setUserTask(e.target.value)}
+/>
+<button type="submit">Add Task</button>
+</form>
+</div>
+{/_ <button onClick={handleFetchTasks}>Fetch Tasks</button> _/}
+<ul id="list-container">
+{tasks?.map((curTask, idx) => {
+return (
+<li key={idx}>
+<p>
+{idx + 1}:{curTask}
+</p>
+<div>
+<MdDeleteForever
+className="icon-style"
+onClick={() => handleDeleteTask(idx)}
+/>
+</div>
+</li>
+);
+})}
+</ul>
+</div>
+</div>
+</>
+);
+};
+
+export default Todo;
+
+RTK folder structure:
+src
+|--app
+| --store.js #Redux store configuration
+|--features
+| |--tasks
+| |--taskSlice.js #The tasks slice
+| |--taskActions.js # action creators(optional if needed sperately)
+| |--taskSelectors.js # selectors(if you have complex selectors)  
+| |--taskAPI.js # Async API calls(if using RTK query or other async logic)  
+|--index.js #Root entry file

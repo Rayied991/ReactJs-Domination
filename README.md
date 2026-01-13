@@ -2287,3 +2287,5 @@ Redux Toolkit simplifies Redux development by:
 - Setting up Redux DevTools by default
 
 This makes it the recommended approach for all new Redux projects!
+
+#React With TypeScript

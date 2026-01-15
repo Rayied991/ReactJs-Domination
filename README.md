@@ -2289,3 +2289,5 @@ Redux Toolkit simplifies Redux development by:
 This makes it the recommended approach for all new Redux projects!
 
 #React With TypeScript
+
+Typescript is superset of JavaScript.

@@ -2290,4 +2290,25 @@ This makes it the recommended approach for all new Redux projects!
 
 #React With TypeScript
 
-Typescript is superset of JavaScript.
+Typescript is superset of JavaScript that allows you to define types for variables,function parameters & return values, enhancing code quality and catching errors  during development.
+
+import { useState } from "react";
+
+const AddToDo = () => {
+    const [todo,setTodo]=useState("");
+
+    const handleFormSubmit=(e)=>{
+        e.preventDefault();
+    }
+  return (
+    <form onSubmit={(e)=>handleFormSubmit}>
+        <input type="text" value={todo} onChange={(e)=>setTodo(e.target.value)} />
+        <button type="submit">Add</button>
+    </form>
+  )
+}
+
+export default AddToDo;
+
+know the type:
+![alt text](image-1.png)

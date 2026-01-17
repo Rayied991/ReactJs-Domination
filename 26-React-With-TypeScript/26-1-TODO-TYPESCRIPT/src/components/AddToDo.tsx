@@ -5,7 +5,10 @@ const AddToDo = () => {
 
     const handleFormSubmit=(e:FormEvent<HTMLElement>)=>{
         e.preventDefault();
+        handleAddToDo(todo);
+        setTodo("");
     }
+    
   return (
     <form onSubmit={handleFormSubmit}>
         <input type="text" value={todo} onChange={(e)=>setTodo(e.target.value)} />

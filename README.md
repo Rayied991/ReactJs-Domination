@@ -2292,6 +2292,7 @@ This makes it the recommended approach for all new Redux projects!
 
 Typescript is superset of JavaScript that allows you to define types for variables,function parameters & return values, enhancing code quality and catching errors  during development.
 
+AddToDo.tsx:
 import { useState } from "react";
 
 const AddToDo = () => {
@@ -2312,3 +2313,21 @@ export default AddToDo;
 
 know the type:
 ![alt text](image-1.png)
+
+todos.tsx:
+
+
+main.tsx:
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { TodosProvider } from './store/Todos.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <TodosProvider>
+    <App />
+    </TodosProvider>
+  </StrictMode>,
+)

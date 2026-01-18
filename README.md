@@ -2292,29 +2292,6 @@ This makes it the recommended approach for all new Redux projects!
 
 Typescript is superset of JavaScript that allows you to define types for variables,function parameters & return values, enhancing code quality and catching errors  during development.
 
-AddToDo.tsx:
-import { useState } from "react";
-
-const AddToDo = () => {
-    const [todo,setTodo]=useState("");
-
-    const handleFormSubmit=(e)=>{
-        e.preventDefault();
-    }
-  return (
-    <form onSubmit={(e)=>handleFormSubmit}>
-        <input type="text" value={todo} onChange={(e)=>setTodo(e.target.value)} />
-        <button type="submit">Add</button>
-    </form>
-  )
-}
-
-export default AddToDo;
-
-know the type:
-![alt text](image-1.png)
-
-todos.tsx:
 
 
 main.tsx:
@@ -2331,4 +2308,90 @@ createRoot(document.getElementById('root')!).render(
     </TodosProvider>
   </StrictMode>,
 )
-Lets continue
+
+
+AddToDo.tsx:
+import { useState, type FormEvent } from "react";
+import { useTodos } from "../store/Todos";
+
+const AddToDo = () => {
+    const [todo,setTodo]=useState("");
+    const {handleAddToDo}=useTodos();
+
+    const handleFormSubmit=(e:FormEvent<HTMLElement>)=>{
+        e.preventDefault();
+        handleAddToDo(todo);
+        setTodo("");
+    }
+    
+  return (
+    <form onSubmit={handleFormSubmit}>
+        <input type="text" value={todo} onChange={(e)=>setTodo(e.target.value)} />
+        <button type="submit">Add</button>
+    </form>
+  )
+}
+
+export default AddToDo;
+know the type:
+![alt text](image-1.png)
+
+todos.tsx:
+import { createContext, useContext, useState, type ReactNode } from "react";
+// creating custom types
+export type TodosProviderProps={
+    // ReactNode is a generic type that covers a wide range of possible children types,
+    // including JSX elements, strings and other React components.
+    children: ReactNode;
+}
+
+export type Todo={
+    id:string;
+    task:string;
+    completed:boolean;
+    createdAt:Date;
+}
+export type TodosContext={
+    todos:Todo[];
+    handleAddToDo:(task:string)=>void;//call signature
+}
+export const TodosContext=createContext<TodosContext | null>(null);
+
+export const TodosProvider=({children}:TodosProviderProps)=>{
+    const [todos,setTodos]=useState<Todo[]>([]);
+    const handleAddToDo=(task:string)=>{
+        setTodos((prev)=>{
+            const newTodos:Todo[]=[
+                {
+                    id:Math.random().toString(),
+                    task:task,
+                    completed:false,
+                    createdAt:new Date()
+                
+                },
+                ...prev
+            ]
+
+            // console.log("My previous data:",prev);
+            // console.log("My new data:",newTodos);
+            return newTodos;
+        })
+        
+    }
+
+
+    return <TodosContext.Provider value={{todos,handleAddToDo}}>
+        {children}
+    </TodosContext.Provider>
+}
+
+
+
+// consumer
+export const useTodos=()=>{
+    const todosConsumer=useContext(TodosContext);
+    if(!todosConsumer){
+        throw new Error("useTodos used outside of Provider");
+    }
+    return  todosConsumer;
+}

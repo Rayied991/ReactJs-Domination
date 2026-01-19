@@ -17,7 +17,7 @@
 9. [Vitest Testing Guide for React](#vitest-testing-guide-for-react)
 10. [React Redux Documentation](#react-redux-documentation)
 11. [Redux Toolkit Complete Guide](#redux-toolkit-complete-guide)
-
+12. [Firebase with React - Complete Guide](#firebase-with-react---complete-guide)
 ---
 
 ## React Fundamentals
@@ -2395,24 +2395,40 @@ export const useTodos=()=>{
     }
     return  todosConsumer;
 }
+# Firebase with React - Complete Guide
 
-## Firebase
+## Initial Setup
 
-Create firebase project->go to firebase.google.com-> go to console->
-create project
+### 1. Create Firebase Project
+1. Go to [firebase.google.com](https://firebase.google.com)
+2. Navigate to Console
+3. Click "Create Project"
+4. Follow the setup wizard
 
-authentication:
-storage,firestore,realtime database,hosting...etc.
+### 2. Setup Firebase with React
+1. In Firebase Console, click on the Web icon (</>) to register your app
+2. Add an app nickname
+3. Follow the provided setup steps
 
-## setup firebase with react:
-go to web->Register app-> add an name->will give steps follow them
+---
 
-create a realtime database->
-in src->firebase->firebase.js:
+## Firebase Configuration
+
+### Project Structure
+```
+src/
+  ├── firebase/
+  │   └── firebase.js
+  ├── pages/
+  │   └── SignUp.jsx
+  └── App.jsx
+```
+
+### Firebase Configuration File
+**Location:** `src/firebase/firebase.js`
+```javascript
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -2422,35 +2438,169 @@ const firebaseConfig = {
   storageBucket: "simple-firebase-2b385.firebasestorage.app",
   messagingSenderId: "522857996583",
   appId: "1:522857996583:web:06baae9aa0ec9b69b08902",
-  databaseURL:"https://simple-firebase-2b385-default-rtdb.firebaseio.com"
+  databaseURL: "https://simple-firebase-2b385-default-rtdb.firebaseio.com"
 };
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+```
 
-Realtime database:
-create from firebase console->
-start in test mode
+---
 
-app.jsx:
+## Realtime Database
+
+### Setup in Firebase Console
+1. Navigate to Realtime Database in Firebase Console
+2. Click "Create Database"
+3. Choose "Start in test mode" for development
+
+### Writing Data to Realtime Database
+
+**Location:** `App.jsx`
+```javascript
 import { getDatabase, ref, set } from 'firebase/database';
 import { app } from './firebase/firebase';
 
-const db=getDatabase(app);
+const db = getDatabase(app);
+
 const App = () => {
-  const putData=()=>{
-    set(ref(db,'users/rayied'),{ //db,name of root,actual data
-      id:1,
-      name:"rayied",
-      age:26
-    })
-  }
+  const putData = () => {
+    set(ref(db, 'users/rayied'), {
+      id: 1,
+      name: "rayied",
+      age: 26
+    });
+  };
+
   return (
     <div className="App">
       <h1>Firebase + React</h1>
-      <button onClick={putData}>put data</button>
+      <button onClick={putData}>Put Data</button>
     </div>
-  )
-}
+  );
+};
 
 export default App;
+```
+
+**Syntax Explanation:**
+- `set(ref(db, 'path/to/data'), { data object })`
+- First parameter: database reference with path
+- Second parameter: actual data to store
+
+---
+
+## Authentication
+
+### Setup in Firebase Console
+1. Go to Authentication tab
+2. Click "Get Started"
+3. Enable "Email/Password" sign-in method
+
+### Sign Up Component
+
+**Location:** `src/pages/SignUp.jsx`
+```javascript
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { useState } from "react";
+import { app } from "../firebase/firebase";
+
+const auth = getAuth(app);
+
+const SignUp = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const createUser = () => {
+    createUserWithEmailAndPassword(auth, email, password)
+      .then(value => alert("Success"));
+  };
+
+  return (
+    <div className="signup-page">
+      <label>Email:</label>
+      <input 
+        onChange={e => setEmail(e.target.value)} 
+        value={email} 
+        type="email" 
+        required 
+        placeholder="Enter your email here" 
+      />
+      
+      <label>Password:</label>
+      <input 
+        onChange={e => setPassword(e.target.value)} 
+        value={password} 
+        type="password" 
+        required 
+        placeholder="Enter your password here" 
+      />
+      
+      <button onClick={createUser}>Sign Up</button>
+    </div>
+  );
+};
+
+export default SignUp;
+```
+
+### Complete App Component
+
+**Location:** `App.jsx`
+```javascript
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { getDatabase, ref, set } from 'firebase/database';
+import { app } from './firebase/firebase';
+import SignUp from './pages/SignUp';
+
+const auth = getAuth(app);
+const db = getDatabase(app);
+
+const App = () => {
+  const putData = () => {
+    set(ref(db, 'users/rayied'), {
+      id: 1,
+      name: "rayied",
+      age: 26
+    });
+  };
+
+  const signupUser = () => {
+    createUserWithEmailAndPassword(auth, 'raydev@gmail.com', '123456')
+      .then(value => console.log(value));
+  };
+
+  return (
+    <div className="App">
+      <h1>Firebase + React</h1>
+      <button onClick={putData}>Put Data</button>
+      {/* <button onClick={signupUser}>Create User</button> */}
+      <SignUp />
+    </div>
+  );
+};
+
+export default App;
+```
+
+---
+
+## Key Firebase Services
+
+### Available Services
+- **Authentication** - User sign-up, sign-in, and management
+- **Realtime Database** - NoSQL cloud database with real-time synchronization
+- **Firestore** - Flexible, scalable NoSQL cloud database
+- **Storage** - File storage for user-generated content
+- **Hosting** - Web app hosting
+- And more...
+
+---
+
+## Important Notes
+
+⚠️ **Security Warning:** Never commit your Firebase configuration with real API keys to public repositories. Use environment variables for production applications.
+
+📝 **Test Mode:** The Realtime Database is set to test mode, which allows unrestricted read/write access. Remember to configure proper security rules before deploying to production.
+
+🔒 **Password Requirements:** Firebase requires passwords to be at least 6 characters long for email/password authentication.

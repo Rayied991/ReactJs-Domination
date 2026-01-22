@@ -2606,3 +2606,31 @@ export default App;
 🔒 **Password Requirements:** Firebase requires passwords to be at least 6 characters long for email/password authentication.
 
 On the way...
+
+
+.env:
+VITE_apiKey=your-actual-api-key-here
+VITE_authDomain=your-project-auth-domain
+VITE_projectId=your-project-id
+VITE_storageBucket=your-storage-bucket
+VITE_messagingSenderId=your-messaging-sender-id
+VITE_appId=your-app-id
+
+firebase.js:
+// Import the functions you need from the SDKs you need
+import { initializeApp } from "firebase/app";
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
+
+// Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: import.meta.env.VITE_apiKey,
+  authDomain: import.meta.env.VITE_authDomain,
+  projectId:  import.meta.env.VITE_projectId,
+  storageBucket:  import.meta.env.VITE_storageBucket,
+  messagingSenderId:  import.meta.env.VITE_messagingSenderId,
+  appId:  import.meta.env.VITE_appId
+};
+
+// Initialize Firebase
+export const app = initializeApp(firebaseConfig);

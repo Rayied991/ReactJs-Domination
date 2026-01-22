@@ -2604,3 +2604,5 @@ export default App;
 📝 **Test Mode:** The Realtime Database is set to test mode, which allows unrestricted read/write access. Remember to configure proper security rules before deploying to production.
 
 🔒 **Password Requirements:** Firebase requires passwords to be at least 6 characters long for email/password authentication.
+
+On the way...

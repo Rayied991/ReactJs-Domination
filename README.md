@@ -2707,4 +2707,97 @@ const App = () => {
 }
 
 export default App;
-//added  signin component 
+//added  signin component
+
+## Correct way to use Firebase in React Application
+/src/context/firebase.jsx:
+/* eslint-disable react-refresh/only-export-components */
+import { initializeApp } from "firebase/app";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
+import { createContext, useContext } from "react";
+const firebaseConfig = {
+  apiKey:import.meta.env.VITE_apiKey,
+  authDomain: import.meta.env.VITE_authDomain,
+  projectId: import.meta.env.VITE_projectId,
+  storageBucket: import.meta.env.VITE_storageBucket,
+  messagingSenderId: import.meta.env.VITE_messagingSenderId,
+  appId: import.meta.env.VITE_appId,
+  databaseURL:import.meta.env.VITE_databaseURL
+};
+const FirebaseApp=initializeApp(firebaseConfig);
+const database=getDatabase(FirebaseApp);
+const FirebaseAuth=getAuth(FirebaseApp);
+const FirebaseContext=createContext(null);
+
+
+// custom Hook
+export const useFirebase=()=>{
+   return useContext(FirebaseContext );
+}
+
+export const FirebaseProvider=(props)=>{
+
+    const signupUserWithEmailAndPassword=(email,password)=>{
+    return createUserWithEmailAndPassword(FirebaseAuth,email,password);
+    }
+
+    const putData=(key,data)=>{
+
+        set(ref(database,key),data);
+    }
+    return(
+        <FirebaseContext.Provider value={{signupUserWithEmailAndPassword,putData}}>
+           {props.children} 
+        </FirebaseContext.Provider>
+    )
+};
+
+main.jsx:
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.jsx'
+import { FirebaseProvider } from './context/Firebase.jsx'
+import './index.css'
+
+createRoot(document.getElementById('root')).render(
+  <StrictMode>
+    <FirebaseProvider>
+    <App />
+    </FirebaseProvider>
+  </StrictMode>,
+)
+
+app.jsx:
+import { useState } from 'react';
+import './App.css';
+import { useFirebase } from './context/Firebase';
+
+function App() {
+
+  //custom hook
+  const firebase=useFirebase();
+  const [email,setEmail]=useState("");
+  const [password,setPassword]=useState("");
+  // console.log(firebase);
+
+
+  return(
+    <div className="App">
+      <h1>Firebase + React</h1>
+      <input type="email"
+      onChange={e=>setEmail(e.target.value)}
+      value={email}
+      placeholder='Enter email' />
+      <input type="text"
+      onChange={e=>setPassword(e.target.value)}
+      value={password}
+      placeholder='Enter password' />
+      <button onClick={()=>{firebase.signupUserWithEmailAndPassword(email,password);
+        firebase.putData("users/" + "rayd",{email,password})
+      }}>SignUp</button>
+    </div>
+  ) 
+}
+
+export default App

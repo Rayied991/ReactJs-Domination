@@ -2615,7 +2615,7 @@ VITE_projectId=your-project-id
 VITE_storageBucket=your-storage-bucket
 VITE_messagingSenderId=your-messaging-sender-id
 VITE_appId=your-app-id
-
+VITE_databaseURL: your-datbase-id
 firebase.js:
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
@@ -2634,3 +2634,77 @@ const firebaseConfig = {
 
 // Initialize Firebase
 export const app = initializeApp(firebaseConfig);
+
+## Login  with Firebase:
+
+signin.jsx:
+/* eslint-disable no-unused-vars */
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { app } from "../firebase/firebase";
+
+const auth=getAuth(app);
+const Signin = () => {
+    const [email,setEmail]=useState("");
+    const [password,setPassword]=useState("");
+
+    const signInUser=()=>{
+        signInWithEmailAndPassword(auth,email,password)
+        .then(value=>console.log("Sign in success"))
+        .catch((err)=>console.log(err))
+    }
+  return (
+    <div className="signin-page">
+        <h1>SignIn Page</h1>
+        <label >Enter your Email</label>
+        <input type="email" onChange={e=>setEmail(e.target.value)} 
+        value={email}
+        placeholder="Enter your email here" />
+
+         <label >Enter your Password</label>
+        <input type="password"
+        onChange={e=>setPassword(e.target.value)}
+        value={password}
+        placeholder="Enter your Password here" />
+    <button onClick={signInUser}>Sign In</button>
+    </div>
+  )
+}
+
+export default Signin
+
+app.jsx:
+/* eslint-disable no-unused-vars */
+import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
+import { getDatabase, ref, set } from 'firebase/database';
+import { app } from './firebase/firebase';
+import SignUp from './pages/SignUp';
+import Signin from './pages/Signin';
+
+const auth=getAuth(app);
+const db=getDatabase(app);
+const App = () => {
+  const putData=()=>{
+    set(ref(db,'users/rayied'),{
+      id:1,
+      name:"rayied",
+      age:26
+    })
+  };
+  const signupUser=()=>{
+    createUserWithEmailAndPassword(auth,'raydev@gmail.com','123456').then(value=>console.log(value));
+  }
+
+  return (
+    <div className="App">
+      <h1>Firebase + React</h1>
+      <button onClick={putData}>put data</button>
+      {/* <button onClick={signupUser}>Create User</button> */}
+      <SignUp/>
+      <Signin/>
+    </div>
+  )
+}
+
+export default App;
+//added  signin component 

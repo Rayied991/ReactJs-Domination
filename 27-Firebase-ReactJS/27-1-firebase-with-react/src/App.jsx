@@ -3,6 +3,7 @@ import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
 import { getDatabase, ref, set } from 'firebase/database';
 import { app } from './firebase/firebase';
 import SignUp from './pages/SignUp';
+import Signin from './pages/Signin';
 
 const auth=getAuth(app);
 const db=getDatabase(app);
@@ -24,8 +25,9 @@ const App = () => {
       <button onClick={putData}>put data</button>
       {/* <button onClick={signupUser}>Create User</button> */}
       <SignUp/>
+      <Signin/>
     </div>
   )
 }
 
-export default App
+export default App;

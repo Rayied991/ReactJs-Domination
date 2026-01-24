@@ -2801,3 +2801,5 @@ function App() {
 }
 
 export default App
+
+## Firebase Google Authentication

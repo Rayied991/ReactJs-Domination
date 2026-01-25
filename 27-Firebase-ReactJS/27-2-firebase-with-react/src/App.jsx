@@ -11,6 +11,9 @@ function App() {
   // console.log(firebase);
 
 
+  const putDataNew=()=>{
+    firebase.putData('/grandfather/father/child',{id:1,name:"Alinur",age:26});
+  }
   return(
     <div className="App">
       <h1>Firebase + React</h1>
@@ -25,6 +28,8 @@ function App() {
       <button onClick={()=>{firebase.signupUserWithEmailAndPassword(email,password);
         firebase.putData("users/" + "rayd",{email,password})
       }}>SignUp</button>
+
+      <button onClick={putDataNew}>Trigger</button>
     </div>
   ) 
 }

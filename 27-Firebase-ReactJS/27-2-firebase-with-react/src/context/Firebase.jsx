@@ -1,8 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { getDatabase, ref, set } from "firebase/database";
-import { createContext, useContext } from "react";
+import { getDatabase, onValue, ref, set } from "firebase/database";
+import { createContext, useContext, useEffect, useState } from "react";
 const firebaseConfig = {
   apiKey:import.meta.env.VITE_apiKey,
   authDomain: import.meta.env.VITE_authDomain,
@@ -25,6 +25,8 @@ export const useFirebase=()=>{
 
 export const FirebaseProvider=(props)=>{
 
+    const [name,setName]=useState("");
+
     const signupUserWithEmailAndPassword=(email,password)=>{
     return createUserWithEmailAndPassword(FirebaseAuth,email,password);
     }
@@ -33,8 +35,16 @@ export const FirebaseProvider=(props)=>{
 
         set(ref(database,key),data);
     }
+// get(child(ref(database),'grandfather')).then(snapshot=>console.log(snapshot.val()));
+    // get(child(ref(database),'grandfather/father')).then(snapshot=>console.log(snapshot.val()));
+
+
+    useEffect(()=>{
+    onValue(ref(database,'grandfather/father/child'),(snapshot)=>setName(snapshot.val().name));
+    },[]);
     return(
         <FirebaseContext.Provider value={{signupUserWithEmailAndPassword,putData}}>
+            <h3>Name is :{name}</h3>
            {props.children} 
         </FirebaseContext.Provider>
     )

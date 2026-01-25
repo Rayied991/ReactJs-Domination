@@ -2397,48 +2397,68 @@ export const useTodos=()=>{
 }
 # Firebase with React - Complete Guide
 
+A comprehensive guide to integrating Firebase services (Authentication, Realtime Database, and Firestore) with React applications.
+
+---
+
+## Table of Contents
+1. [Initial Setup](#initial-setup)
+2. [Firebase Configuration](#firebase-configuration)
+3. [Authentication](#authentication)
+4. [Realtime Database](#realtime-database)
+5. [Cloud Firestore](#cloud-firestore)
+6. [Context API Pattern](#context-api-pattern)
+7. [Security Best Practices](#security-best-practices)
+
+---
+
 ## Initial Setup
 
 ### 1. Create Firebase Project
-1. Go to [firebase.google.com](https://firebase.google.com)
+1. Visit [firebase.google.com](https://firebase.google.com)
 2. Navigate to Console
 3. Click "Create Project"
 4. Follow the setup wizard
+5. Register your web app by clicking the Web icon (`</>`)
 
-### 2. Setup Firebase with React
-1. In Firebase Console, click on the Web icon (</>) to register your app
-2. Add an app nickname
-3. Follow the provided setup steps
+### 2. Install Firebase SDK
+```bash
+npm install firebase
+```
 
 ---
 
 ## Firebase Configuration
 
-### Project Structure
-```
-src/
-  ├── firebase/
-  │   └── firebase.js
-  ├── pages/
-  │   └── SignUp.jsx
-  └── App.jsx
+### Environment Variables Setup
+
+Create a `.env` file in your project root:
+
+```env
+VITE_apiKey=your-actual-api-key-here
+VITE_authDomain=your-project-auth-domain
+VITE_projectId=your-project-id
+VITE_storageBucket=your-storage-bucket
+VITE_messagingSenderId=your-messaging-sender-id
+VITE_appId=your-app-id
+VITE_databaseURL=your-database-url
 ```
 
 ### Firebase Configuration File
+
 **Location:** `src/firebase/firebase.js`
+
 ```javascript
-// Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
 
-// Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyCDutnS4rfQxzcDnU7IgBgA0R09uV2eHuE",
-  authDomain: "simple-firebase-2b385.firebaseapp.com",
-  projectId: "simple-firebase-2b385",
-  storageBucket: "simple-firebase-2b385.firebasestorage.app",
-  messagingSenderId: "522857996583",
-  appId: "1:522857996583:web:06baae9aa0ec9b69b08902",
-  databaseURL: "https://simple-firebase-2b385-default-rtdb.firebaseio.com"
+  apiKey: import.meta.env.VITE_apiKey,
+  authDomain: import.meta.env.VITE_authDomain,
+  projectId: import.meta.env.VITE_projectId,
+  storageBucket: import.meta.env.VITE_storageBucket,
+  messagingSenderId: import.meta.env.VITE_messagingSenderId,
+  appId: import.meta.env.VITE_appId,
+  databaseURL: import.meta.env.VITE_databaseURL
 };
 
 // Initialize Firebase
@@ -2447,65 +2467,24 @@ export const app = initializeApp(firebaseConfig);
 
 ---
 
-## Realtime Database
-
-### Setup in Firebase Console
-1. Navigate to Realtime Database in Firebase Console
-2. Click "Create Database"
-3. Choose "Start in test mode" for development
-
-### Writing Data to Realtime Database
-
-**Location:** `App.jsx`
-```javascript
-import { getDatabase, ref, set } from 'firebase/database';
-import { app } from './firebase/firebase';
-
-const db = getDatabase(app);
-
-const App = () => {
-  const putData = () => {
-    set(ref(db, 'users/rayied'), {
-      id: 1,
-      name: "rayied",
-      age: 26
-    });
-  };
-
-  return (
-    <div className="App">
-      <h1>Firebase + React</h1>
-      <button onClick={putData}>Put Data</button>
-    </div>
-  );
-};
-
-export default App;
-```
-
-**Syntax Explanation:**
-- `set(ref(db, 'path/to/data'), { data object })`
-- First parameter: database reference with path
-- Second parameter: actual data to store
-
----
-
 ## Authentication
 
 ### Setup in Firebase Console
-1. Go to Authentication tab
-2. Click "Get Started"
-3. Enable "Email/Password" sign-in method
+1. Go to **Authentication** tab
+2. Click **Get Started**
+3. Enable **Email/Password** and **Google** sign-in methods
 
-### Sign Up Component
+### Email/Password Authentication
 
-**Location:** `src/pages/SignUp.jsx`
+#### Sign Up Component
 ```javascript
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
 import { useState } from "react";
 import { app } from "../firebase/firebase";
 
 const auth = getAuth(app);
+const db = getDatabase(app);
 
 const SignUp = () => {
   const [email, setEmail] = useState("");
@@ -2513,27 +2492,35 @@ const SignUp = () => {
 
   const createUser = () => {
     createUserWithEmailAndPassword(auth, email, password)
-      .then(value => alert("Success"));
+      .then((value) => {
+        // Store user data in Realtime Database
+        set(ref(db, "users/" + value.user.uid), {
+          email: value.user.email,
+          createdAt: new Date().toISOString(),
+          provider: "email"
+        });
+        alert("Success");
+      })
+      .catch(err => console.log(err));
   };
 
   return (
     <div className="signup-page">
+      <h1>Sign Up Page</h1>
       <label>Email:</label>
       <input 
-        onChange={e => setEmail(e.target.value)} 
-        value={email} 
         type="email" 
-        required 
-        placeholder="Enter your email here" 
+        onChange={e => setEmail(e.target.value)} 
+        value={email}
+        placeholder="Enter your email" 
       />
       
       <label>Password:</label>
       <input 
+        type="password"
         onChange={e => setPassword(e.target.value)} 
-        value={password} 
-        type="password" 
-        required 
-        placeholder="Enter your password here" 
+        value={password}
+        placeholder="Enter your password" 
       />
       
       <button onClick={createUser}>Sign Up</button>
@@ -2544,38 +2531,133 @@ const SignUp = () => {
 export default SignUp;
 ```
 
-### Complete App Component
-
-**Location:** `App.jsx`
+#### Sign In Component
 ```javascript
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { getDatabase, ref, set } from 'firebase/database';
-import { app } from './firebase/firebase';
-import SignUp from './pages/SignUp';
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+import { useState } from "react";
+import { app } from "../firebase/firebase";
 
 const auth = getAuth(app);
-const db = getDatabase(app);
 
-const App = () => {
-  const putData = () => {
-    set(ref(db, 'users/rayied'), {
-      id: 1,
-      name: "rayied",
-      age: 26
-    });
-  };
+const Signin = () => {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const signupUser = () => {
-    createUserWithEmailAndPassword(auth, 'raydev@gmail.com', '123456')
-      .then(value => console.log(value));
+  const signInUser = () => {
+    signInWithEmailAndPassword(auth, email, password)
+      .then(value => console.log("Sign in success"))
+      .catch((err) => console.log(err));
   };
 
   return (
+    <div className="signin-page">
+      <h1>Sign In Page</h1>
+      <label>Enter your Email</label>
+      <input 
+        type="email" 
+        onChange={e => setEmail(e.target.value)} 
+        value={email}
+        placeholder="Enter your email" 
+      />
+
+      <label>Enter your Password</label>
+      <input 
+        type="password"
+        onChange={e => setPassword(e.target.value)}
+        value={password}
+        placeholder="Enter your password" 
+      />
+      
+      <button onClick={signInUser}>Sign In</button>
+    </div>
+  );
+};
+
+export default Signin;
+```
+
+### Google Authentication
+
+```javascript
+import { 
+  GoogleAuthProvider, 
+  signInWithPopup, 
+  getAuth 
+} from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
+import { app } from "../firebase/firebase";
+
+const auth = getAuth(app);
+const db = getDatabase(app);
+const googleProvider = new GoogleAuthProvider();
+
+const signupWithGoogle = () => {
+  signInWithPopup(auth, googleProvider)
+    .then((result) => {
+      const user = result.user;
+      
+      // Store user data in Realtime Database
+      set(ref(db, "users/" + user.uid), {
+        email: user.email,
+        displayName: user.displayName,
+        photoURL: user.photoURL,
+        provider: 'google',
+        createdAt: new Date().toISOString()
+      })
+      .then(() => console.log("User data saved to database"))
+      .catch(err => console.error("Error saving to database:", err));
+      
+      console.log("Google sign-in successful");
+    })
+    .catch((error) => {
+      console.error("Error:", error.code, error.message);
+    });
+};
+```
+
+### Auth State Management
+
+Monitor authentication state and conditionally render UI:
+
+```javascript
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { useEffect, useState } from 'react';
+import { app } from './firebase/firebase';
+import SignUp from './pages/SignUp';
+import Signin from './pages/Signin';
+
+const auth = getAuth(app);
+
+const App = () => {
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        console.log("User logged in:", user);
+        setUser(user);
+      } else {
+        console.log("Logged out");
+        setUser(null);
+      }
+    });
+  }, []);
+
+  // Show auth forms when user is NOT logged in
+  if (user == null) {
+    return (
+      <div className="App">
+        <SignUp />
+        <Signin />
+      </div>
+    );
+  }
+
+  // Show welcome message when user IS logged in
+  return (
     <div className="App">
-      <h1>Firebase + React</h1>
-      <button onClick={putData}>Put Data</button>
-      {/* <button onClick={signupUser}>Create User</button> */}
-      <SignUp />
+      <h1>Hello {user.email || user.displayName || "User"}</h1>
+      <button onClick={() => signOut(auth)}>Log Out</button>
     </div>
   );
 };
@@ -2585,712 +2667,414 @@ export default App;
 
 ---
 
-## Key Firebase Services
+## Realtime Database
 
-### Available Services
-- **Authentication** - User sign-up, sign-in, and management
-- **Realtime Database** - NoSQL cloud database with real-time synchronization
-- **Firestore** - Flexible, scalable NoSQL cloud database
-- **Storage** - File storage for user-generated content
-- **Hosting** - Web app hosting
-- And more...
+### Setup in Firebase Console
+1. Navigate to **Realtime Database** in Firebase Console
+2. Click **Create Database**
+3. Choose **Start in test mode** for development
+
+### Writing Data
+
+```javascript
+import { getDatabase, ref, set } from 'firebase/database';
+import { app } from './firebase/firebase';
+
+const db = getDatabase(app);
+
+const putData = () => {
+  set(ref(db, 'users/rayied'), {
+    id: 1,
+    name: "rayied",
+    age: 26
+  });
+};
+
+// Nested data structure
+const putNestedData = () => {
+  set(ref(db, 'grandfather/father/child'), {
+    id: 1,
+    name: "Alinur",
+    age: 26
+  });
+};
+```
+
+### Reading Data (One-time)
+
+```javascript
+import { getDatabase, ref, child, get } from 'firebase/database';
+import { app } from './firebase/firebase';
+
+const db = getDatabase(app);
+
+// Read specific path
+get(child(ref(db), 'grandfather/father'))
+  .then(snapshot => {
+    if (snapshot.exists()) {
+      console.log(snapshot.val());
+    } else {
+      console.log("No data available");
+    }
+  })
+  .catch(error => console.error(error));
+```
+
+### Real-time Listeners
+
+Listen to data changes in real-time:
+
+```javascript
+import { getDatabase, ref, onValue } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { app } from './firebase/firebase';
+
+const db = getDatabase(app);
+
+const MyComponent = () => {
+  const [name, setName] = useState("");
+
+  useEffect(() => {
+    const dataRef = ref(db, 'grandfather/father/child');
+    
+    // Set up real-time listener
+    const unsubscribe = onValue(dataRef, (snapshot) => {
+      const data = snapshot.val();
+      if (data) {
+        setName(data.name);
+      }
+    });
+
+    // Cleanup listener on unmount
+    return () => unsubscribe();
+  }, []);
+
+  return <h3>Name is: {name}</h3>;
+};
+```
 
 ---
 
-## Important Notes
+## Cloud Firestore
 
-⚠️ **Security Warning:** Never commit your Firebase configuration with real API keys to public repositories. Use environment variables for production applications.
+### Setup in Firebase Console
+1. Go to **Build** → **Firestore Database**
+2. Click **Create Database**
+3. Choose **Start in test mode** for development
 
-📝 **Test Mode:** The Realtime Database is set to test mode, which allows unrestricted read/write access. Remember to configure proper security rules before deploying to production.
+### Firestore Structure
+- **Collections** contain **Documents**
+- **Documents** contain **Fields** (key-value pairs)
+- Documents can have **Sub-collections**
 
-🔒 **Password Requirements:** Firebase requires passwords to be at least 6 characters long for email/password authentication.
+### Writing Data
 
-On the way...
+```javascript
+import { addDoc, collection, getFirestore } from "firebase/firestore";
+import { app } from "./firebase/firebase";
 
+const firestoredb = getFirestore(app);
 
-.env:
-VITE_apiKey=your-actual-api-key-here
-VITE_authDomain=your-project-auth-domain
-VITE_projectId=your-project-id
-VITE_storageBucket=your-storage-bucket
-VITE_messagingSenderId=your-messaging-sender-id
-VITE_appId=your-app-id
-VITE_databaseURL: your-datbase-id
-firebase.js:
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: import.meta.env.VITE_apiKey,
-  authDomain: import.meta.env.VITE_authDomain,
-  projectId:  import.meta.env.VITE_projectId,
-  storageBucket:  import.meta.env.VITE_storageBucket,
-  messagingSenderId:  import.meta.env.VITE_messagingSenderId,
-  appId:  import.meta.env.VITE_appId
+// Add document to collection
+const writeData = async () => {
+  const result = await addDoc(collection(firestoredb, 'cities'), {
+    name: 'Dhaka',
+    pinCode: 1234,
+    lat: 123,
+    long: 456
+  });
+  console.log("Document created with ID:", result.id);
 };
 
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-
-## Login  with Firebase:
-
-signin.jsx:
-/* eslint-disable no-unused-vars */
-import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
-import { useState } from "react";
-import { app } from "../firebase/firebase";
-
-const auth=getAuth(app);
-const Signin = () => {
-    const [email,setEmail]=useState("");
-    const [password,setPassword]=useState("");
-
-    const signInUser=()=>{
-        signInWithEmailAndPassword(auth,email,password)
-        .then(value=>console.log("Sign in success"))
-        .catch((err)=>console.log(err))
+// Create sub-collection
+const makeSubCollection = async () => {
+  await addDoc(
+    collection(firestoredb, "cities/urDuHSu1d8kxKwGj8OH8/places"),
+    {
+      name: "Old Dhaka",
+      desc: "dhaka city",
+      date: Date.now()
     }
-  return (
-    <div className="signin-page">
-        <h1>SignIn Page</h1>
-        <label >Enter your Email</label>
-        <input type="email" onChange={e=>setEmail(e.target.value)} 
-        value={email}
-        placeholder="Enter your email here" />
+  );
+};
+```
 
-         <label >Enter your Password</label>
-        <input type="password"
-        onChange={e=>setPassword(e.target.value)}
-        value={password}
-        placeholder="Enter your Password here" />
-    <button onClick={signInUser}>Sign In</button>
-    </div>
-  )
-}
+### Reading Data (Known Document ID)
 
-export default Signin
+```javascript
+import { doc, getDoc, getFirestore } from "firebase/firestore";
+import { app } from "./firebase/firebase";
 
-app.jsx:
-/* eslint-disable no-unused-vars */
-import { createUserWithEmailAndPassword, getAuth } from 'firebase/auth';
-import { getDatabase, ref, set } from 'firebase/database';
-import { app } from './firebase/firebase';
-import SignUp from './pages/SignUp';
-import Signin from './pages/Signin';
+const firestoredb = getFirestore(app);
 
-const auth=getAuth(app);
-const db=getDatabase(app);
-const App = () => {
-  const putData=()=>{
-    set(ref(db,'users/rayied'),{
-      id:1,
-      name:"rayied",
-      age:26
-    })
-  };
-  const signupUser=()=>{
-    createUserWithEmailAndPassword(auth,'raydev@gmail.com','123456').then(value=>console.log(value));
+const getDocument = async () => {
+  const docRef = doc(firestoredb, 'cities', 'urDuHSu1d8kxKwGj8OH8');
+  const snapshot = await getDoc(docRef);
+  
+  if (snapshot.exists()) {
+    console.log("Document data:", snapshot.data());
+  } else {
+    console.log("No such document!");
   }
+};
+```
 
-  return (
-    <div className="App">
-      <h1>Firebase + React</h1>
-      <button onClick={putData}>put data</button>
-      {/* <button onClick={signupUser}>Create User</button> */}
-      <SignUp/>
-      <Signin/>
-    </div>
-  )
-}
+### Querying Data (Unknown Document ID)
 
-export default App;
-//added  signin component
+```javascript
+import { 
+  collection, 
+  getDocs, 
+  getFirestore, 
+  query, 
+  where 
+} from "firebase/firestore";
+import { app } from "./firebase/firebase";
 
-## Correct way to use Firebase in React Application
-/src/context/firebase.jsx:
-/* eslint-disable react-refresh/only-export-components */
+const firestoredb = getFirestore(app);
+
+const getDocuments = async () => {
+  const collectionRef = collection(firestoredb, 'users');
+  const q = query(collectionRef, where('isMale', '==', true));
+  const snapshot = await getDocs(q);
+
+  snapshot.forEach(doc => {
+    console.log(doc.id, " => ", doc.data());
+  });
+};
+```
+
+### Updating Data
+
+```javascript
+import { doc, updateDoc, getFirestore } from "firebase/firestore";
+import { app } from "./firebase/firebase";
+
+const firestoredb = getFirestore(app);
+
+const updateDocument = async () => {
+  const docRef = doc(firestoredb, "cities", "urDuHSu1d8kxKwGj8OH8");
+  await updateDoc(docRef, {
+    name: "Sylhet"
+  });
+  console.log("Document updated successfully");
+};
+```
+
+---
+
+## Context API Pattern
+
+### Why Use Context?
+- Centralized Firebase logic
+- Avoid prop drilling
+- Easy access to Firebase methods across components
+- Better code organization
+
+### Firebase Context Setup
+
+**Location:** `src/context/Firebase.jsx`
+
+```javascript
 import { initializeApp } from "firebase/app";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import { getDatabase, ref, set } from "firebase/database";
 import { createContext, useContext } from "react";
+
 const firebaseConfig = {
-  apiKey:import.meta.env.VITE_apiKey,
+  apiKey: import.meta.env.VITE_apiKey,
   authDomain: import.meta.env.VITE_authDomain,
   projectId: import.meta.env.VITE_projectId,
   storageBucket: import.meta.env.VITE_storageBucket,
   messagingSenderId: import.meta.env.VITE_messagingSenderId,
   appId: import.meta.env.VITE_appId,
-  databaseURL:import.meta.env.VITE_databaseURL
-};
-const FirebaseApp=initializeApp(firebaseConfig);
-const database=getDatabase(FirebaseApp);
-const FirebaseAuth=getAuth(FirebaseApp);
-const FirebaseContext=createContext(null);
-
-
-// custom Hook
-export const useFirebase=()=>{
-   return useContext(FirebaseContext );
-}
-
-export const FirebaseProvider=(props)=>{
-
-    const signupUserWithEmailAndPassword=(email,password)=>{
-    return createUserWithEmailAndPassword(FirebaseAuth,email,password);
-    }
-
-    const putData=(key,data)=>{
-
-        set(ref(database,key),data);
-    }
-    return(
-        <FirebaseContext.Provider value={{signupUserWithEmailAndPassword,putData}}>
-           {props.children} 
-        </FirebaseContext.Provider>
-    )
+  databaseURL: import.meta.env.VITE_databaseURL
 };
 
-main.jsx:
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.jsx'
-import { FirebaseProvider } from './context/Firebase.jsx'
-import './index.css'
+const FirebaseApp = initializeApp(firebaseConfig);
+const database = getDatabase(FirebaseApp);
+const FirebaseAuth = getAuth(FirebaseApp);
+const FirebaseContext = createContext(null);
+
+// Custom Hook
+export const useFirebase = () => {
+  return useContext(FirebaseContext);
+};
+
+export const FirebaseProvider = (props) => {
+  const signupUserWithEmailAndPassword = (email, password) => {
+    return createUserWithEmailAndPassword(FirebaseAuth, email, password);
+  };
+
+  const putData = (key, data) => {
+    set(ref(database, key), data);
+  };
+
+  return (
+    <FirebaseContext.Provider 
+      value={{ signupUserWithEmailAndPassword, putData }}
+    >
+      {props.children}
+    </FirebaseContext.Provider>
+  );
+};
+```
+
+### Wrapping App with Provider
+
+**Location:** `main.jsx`
+
+```javascript
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import App from './App.jsx';
+import { FirebaseProvider } from './context/Firebase.jsx';
+import './index.css';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <FirebaseProvider>
-    <App />
+      <App />
     </FirebaseProvider>
-  </StrictMode>,
-)
+  </StrictMode>
+);
+```
 
-app.jsx:
+### Using Firebase Context
+
+**Location:** `App.jsx`
+
+```javascript
 import { useState } from 'react';
 import './App.css';
 import { useFirebase } from './context/Firebase';
 
 function App() {
+  const firebase = useFirebase();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  //custom hook
-  const firebase=useFirebase();
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  // console.log(firebase);
+  const handleSignUp = () => {
+    firebase.signupUserWithEmailAndPassword(email, password);
+    firebase.putData("users/" + "rayd", { email, password });
+  };
 
-
-  return(
+  return (
     <div className="App">
       <h1>Firebase + React</h1>
-      <input type="email"
-      onChange={e=>setEmail(e.target.value)}
-      value={email}
-      placeholder='Enter email' />
-      <input type="text"
-      onChange={e=>setPassword(e.target.value)}
-      value={password}
-      placeholder='Enter password' />
-      <button onClick={()=>{firebase.signupUserWithEmailAndPassword(email,password);
-        firebase.putData("users/" + "rayd",{email,password})
-      }}>SignUp</button>
+      <input 
+        type="email"
+        onChange={e => setEmail(e.target.value)}
+        value={email}
+        placeholder='Enter email' 
+      />
+      <input 
+        type="password"
+        onChange={e => setPassword(e.target.value)}
+        value={password}
+        placeholder='Enter password' 
+      />
+      <button onClick={handleSignUp}>Sign Up</button>
     </div>
-  ) 
+  );
 }
 
-export default App
+export default App;
+```
 
-## Firebase Google Authentication & User signed in or not fetch user
+---
 
-signup.jsx:
+## Security Best Practices
 
-import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
-import { getDatabase, ref, set } from "firebase/database";
-import { useState } from "react";
-import { app } from "../firebase/firebase";
+### 1. Environment Variables
+- ✅ **Never** commit Firebase config with real API keys to public repositories
+- ✅ Use `.env` files and add them to `.gitignore`
+- ✅ Use environment variables for all sensitive data
 
+### 2. Firebase Security Rules
 
-const auth=getAuth(app);
-const db = getDatabase(app);
-const googleProvider=new GoogleAuthProvider();
-
-const SignUp = () => {
-    const [email,setEmail]=useState("");
-    const [password,setPassword]=useState("");
-
-    const createUser=()=>{
-        createUserWithEmailAndPassword(auth,email,password).then((value)=>{
-           // Optionally store user data in Realtime Database
-           set(ref(db,"users/"+ value.user.uid),{
-            email:value.user.email,
-            createdAt: new Date().toISOString(),
-            provider: "email"
-           });
-           alert("success");
-        })
-        .catch(err=>console.log(err));
-    }
-
-    const signupWIthGoogle=()=>{
-      signInWithPopup(auth,googleProvider)
-      .then((result)=>{
-        // Signed-in user info
-        const user=result.user;
-
-         // Optionally store user data in Realtime Database
-         set(ref(db,"users/"+user.uid),{
-                    email: user.email,
-                    displayName: user.displayName,
-                    photoURL: user.photoURL,
-                    provider: 'google',
-                    createdAt: new Date().toISOString()
-         })
-         .then(() => console.log("User data saved to database"))
-                .catch(err => console.error("Error saving to database:", err));
-
-                console.log("Google sign-in successful");
-      })
-      .catch((error) => {
-                console.error("Error:", error.code, error.message);
-            });
-     
-    }
-  return (
-    <div className="signup-page">
-      <h1>SignUp Page</h1>
-        <label >Email:</label>
-        <input onChange={e=>setEmail(e.target.value)} value={email} type="email" required placeholder="Enter your email here" />
-        <label >Password:</label>
-        <input onChange={e=>setPassword(e.target.value)} value={password} type="password" required placeholder="Enter your password here" />
-       <br />
-       <button onClick={signupWIthGoogle}>Sign in With Google</button>
-        <button onClick={createUser}>Sign Up</button>
-    </div>
-  )
-}
-
-export default SignUp;
-
-app.jsx:
-/* eslint-disable no-unused-vars */
-import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
-import { getDatabase, ref, set } from 'firebase/database';
-import { useEffect, useState } from 'react';
-import { app } from './firebase/firebase';
-import SignUp from './pages/SignUp';
-import Signin from './pages/Signin';
-
-const auth=getAuth(app);
-const db=getDatabase(app);
-const App = () => {
-  const [user,setUser]=useState(null);
-  const putData=()=>{
-    set(ref(db,'users/rayied'),{
-      id:1,
-      name:"rayied",
-      age:26
-    })
-  };
-  const signupUser=()=>{
-    createUserWithEmailAndPassword(auth,'raydev@gmail.com','123456').then(value=>console.log(value));
-  }
-  useEffect(()=>{
-    onAuthStateChanged(auth,(user)=>{
-      if(user){
-        // logged in
-        console.log("User logged in:", user); // Debug: check what's in user object
-        setUser(user);
+#### Realtime Database Rules
+```json
+{
+  "rules": {
+    "users": {
+      "$uid": {
+        ".read": "$uid === auth.uid",
+        ".write": "$uid === auth.uid"
       }
-      else{
-        console.log("Logged out");
-        setUser(null);
-      }
-    });
-  },[]);
-
-   // When user is NOT logged in, show SignUp and SignIn
-  if(user==null){
-  return (
-    <div className="App">
-      {/* <h1>Firebase + React</h1>
-      <button onClick={putData}>put data</button> */}
-      {/* <button onClick={signupUser}>Create User</button> */}
-      <SignUp/>
-      <Signin/>
-    </div>
-  )
-  }
-
-   // When user IS logged in, show welcome message and logout button
-    return (
-    <div className="App">
-      {/* <h1>Firebase + React</h1>
-      <button onClick={putData}>put data</button> */}
-      {/* <button onClick={signupUser}>Create User</button> */}
-      <h1>Hello {user.email || user.displayName || "User"}</h1>
-      <button onClick={() => signOut(auth)}>LogOut</button>
-    </div>
-  )
-
-
-}
-
-export default App;
-
-## Getting started With Firebase Cloud Firestore
-
-Build->Firestore database->create database[use it in test mode]
-start collection
-add documents.
-
-collection->documents->fields
-
-firebase.js:
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
-
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey:import.meta.env.VITE_apiKey,
-  authDomain: import.meta.env.VITE_authDomain,
-  projectId: import.meta.env.VITE_projectId,
-  storageBucket: import.meta.env.VITE_storageBucket,
-  messagingSenderId: import.meta.env.VITE_messagingSenderId,
-  appId: import.meta.env.VITE_appId,
-  databaseURL:import.meta.env.VITE_databaseURL
-};
-
-// Initialize Firebase
-export const app = initializeApp(firebaseConfig);
-
-write data:
-app.jsx:
-import { addDoc, collection, getFirestore } from "firebase/firestore";
-import { app } from "./Firebase/firebase.js";
-const firestoredb=getFirestore(app);
-const App = () => {
-  const writeData=async()=>{
-  const result=await addDoc(collection(firestoredb,'cities'),{
-      name:'Dhaka',
-      pinCode:1234,
-      lat: 123,
-      long:456
-    });
-    console.log("Result= ",result);
-  }
-
-  const makeSubCollection=async()=>{
-    await addDoc(collection(firestoredb,"cities/urDuHSu1d8kxKwGj8OH8/places"),{
-      name:"Old Dhaka",
-      desc:"dhaka city",
-      date: Date.now()
-    });
-  };
-  
-  return (
-    <div className="App">
-      <h1>Firebase FireStore</h1>
-      <button onClick={writeData}>Put data</button>
-      <button onClick={makeSubCollection}>Put Sub data</button>
-    </div>
-  )
-}
-
-export default App
-
-Read data when we know id:
-app.jsx:
-import { addDoc, collection, doc, getDoc, getFirestore } from "firebase/firestore";
-import { app } from "./Firebase/firebase.js";
-const firestoredb=getFirestore(app);
-const App = () => {
-  const writeData=async()=>{
-  const result=await addDoc(collection(firestoredb,'cities'),{
-      name:'Dhaka',
-      pinCode:1234,
-      lat: 123,
-      long:456
-    });
-    console.log("Result= ",result);
-  }
-
-  const makeSubCollection=async()=>{
-    await addDoc(collection(firestoredb,"cities/urDuHSu1d8kxKwGj8OH8/places"),{
-      name:"Old Dhaka",
-      desc:"dhaka city",
-      date: Date.now()
-    });
-  };
-
-  const getDocument=async()=>{
-    const ref=doc(firestoredb,'cities','urDuHSu1d8kxKwGj8OH8');
-    const snap=await getDoc(ref);
-    console.log(snap.data());
-  }
-  
-  return (
-    <div className="App">
-      <h1>Firebase FireStore</h1>
-      <button onClick={writeData}>Put data</button>
-      <button onClick={makeSubCollection}>Put Sub data</button>
-      <button onClick={getDocument}>Get Document</button>
-    </div>
-  )
-}
-
-export default App
-
-Read data when we don't know id(using query):
-app.jsx:
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, where } from "firebase/firestore";
-import { app } from "./Firebase/firebase.js";
-const firestoredb=getFirestore(app);
-const App = () => {
-  const writeData=async()=>{
-  const result=await addDoc(collection(firestoredb,'cities'),{
-      name:'Dhaka',
-      pinCode:1234,
-      lat: 123,
-      long:456
-    });
-    console.log("Result= ",result);
-  }
-
-  const makeSubCollection=async()=>{
-    await addDoc(collection(firestoredb,"cities/urDuHSu1d8kxKwGj8OH8/places"),{
-      name:"Old Dhaka",
-      desc:"dhaka city",
-      date: Date.now()
-    });
-  };
-
-  const getDocument=async()=>{
-    const ref=doc(firestoredb,'cities','urDuHSu1d8kxKwGj8OH8');
-    const snap=await getDoc(ref);
-    console.log(snap.data());
-  }
-
-  const getDocuments=async()=>{
-    const collectionRef=collection(firestoredb,'users');
-    const q=query(collectionRef,where('isMale', "==",true));
-    const snapshot=await getDocs(q);
-
-    snapshot.forEach(data=>console.log(data.data()));
-  }
-  
-  return (
-    <div className="App">
-      <h1>Firebase FireStore</h1>
-      <button onClick={writeData}>Put data</button>
-      <button onClick={makeSubCollection}>Put Sub data</button>
-      <button onClick={getDocument}>Get Document</button>
-       <button onClick={getDocuments}>Get Document by Query</button>
-    </div>
-  )
-}
-
-export default App;
-
-update data:
-import { addDoc, collection, doc, getDoc, getDocs, getFirestore, query, updateDoc, where } from "firebase/firestore";
-import { app } from "./Firebase/firebase.js";
-const firestoredb=getFirestore(app);
-const App = () => {
-  const writeData=async()=>{
-  const result=await addDoc(collection(firestoredb,'cities'),{
-      name:'Dhaka',
-      pinCode:1234,
-      lat: 123,
-      long:456
-    });
-    console.log("Result= ",result);
-  }
-
-  const makeSubCollection=async()=>{
-    await addDoc(collection(firestoredb,"cities/urDuHSu1d8kxKwGj8OH8/places"),{
-      name:"Old Dhaka",
-      desc:"dhaka city",
-      date: Date.now()
-    });
-  };
-
-  const getDocument=async()=>{
-    const ref=doc(firestoredb,'cities','urDuHSu1d8kxKwGj8OH8');
-    const snap=await getDoc(ref);
-    console.log(snap.data());
-  }
-
-  const getDocuments=async()=>{
-    const collectionRef=collection(firestoredb,'users');
-    const q=query(collectionRef,where('isMale', "==",true));
-    const snapshot=await getDocs(q);
-
-    snapshot.forEach(data=>console.log(data.data()));
-  }
-
-
-  const update=async()=>{
-    const docRef=doc(firestoredb,"cities","urDuHSu1d8kxKwGj8OH8");
-   await updateDoc(docRef,{
-      name:"Sylhet"
-    })
-  }
-  
-  return (
-    <div className="App">
-      <h1>Firebase FireStore</h1>
-      <button onClick={writeData}>Put data</button>
-      <button onClick={makeSubCollection}>Put Sub data</button>
-      <button onClick={getDocument}>Get Document</button>
-      <button onClick={getDocuments}>Get Document by Query</button>
-      <button onClick={update}>Update</button>
-    </div>
-  )
-}
-
-export default App;
-
-## Setup a  Firebase Realtime Database with Reactjs
-In this database all datas are in tree forms.
-put data:
-app.jsx:
-import { useState } from 'react';
-import './App.css';
-import { useFirebase } from './context/Firebase';
-
-function App() {
-
-  //custom hook
-  const firebase=useFirebase();
-  const [email,setEmail]=useState("");
-  const [password,setPassword]=useState("");
-  // console.log(firebase);
-
-
-  const putDataNew=()=>{
-    firebase.putData('/grandfather/father/child',{id:1,name:"Alinur",age:26});
-  }
-  return(
-    <div className="App">
-      <h1>Firebase + React</h1>
-      <input type="email"
-      onChange={e=>setEmail(e.target.value)}
-      value={email}
-      placeholder='Enter email' />
-      <input type="text"
-      onChange={e=>setPassword(e.target.value)}
-      value={password}
-      placeholder='Enter password' />
-      <button onClick={()=>{firebase.signupUserWithEmailAndPassword(email,password);
-        firebase.putData("users/" + "rayd",{email,password})
-      }}>SignUp</button>
-
-      <button onClick={putDataNew}>Trigger</button>
-    </div>
-  ) 
-}
-
-export default App
-
-Read data from database:
-Firebase.jsx:
-/* eslint-disable react-refresh/only-export-components */
-import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { child, get, getDatabase, ref, set,onValue } from "firebase/database";
-import { createContext, useContext } from "react";
-const firebaseConfig = {
-  apiKey:import.meta.env.VITE_apiKey,
-  authDomain: import.meta.env.VITE_authDomain,
-  projectId: import.meta.env.VITE_projectId,
-  storageBucket: import.meta.env.VITE_storageBucket,
-  messagingSenderId: import.meta.env.VITE_messagingSenderId,
-  appId: import.meta.env.VITE_appId,
-  databaseURL:import.meta.env.VITE_databaseURL
-};
-const FirebaseApp=initializeApp(firebaseConfig);
-const database=getDatabase(FirebaseApp);
-const FirebaseAuth=getAuth(FirebaseApp);
-const FirebaseContext=createContext(null);
-
-
-// custom Hook
-export const useFirebase=()=>{
-   return useContext(FirebaseContext );
-}
-
-export const FirebaseProvider=(props)=>{
-
-    const signupUserWithEmailAndPassword=(email,password)=>{
-    return createUserWithEmailAndPassword(FirebaseAuth,email,password);
     }
-
-    const putData=(key,data)=>{
-
-        set(ref(database,key),data);
-    }
-// get(child(ref(database),'grandfather')).then(snapshot=>console.log(snapshot.val()));
-    get(child(ref(database),'grandfather/father')).then(snapshot=>console.log(snapshot.val()));
-    return(
-        <FirebaseContext.Provider value={{signupUserWithEmailAndPassword,putData}}>
-           {props.children} 
-        </FirebaseContext.Provider>
-    )
-};
-
-Realtime db listen in realtime:
-/* eslint-disable react-refresh/only-export-components */
-import { initializeApp } from "firebase/app";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
-import { getDatabase, onValue, ref, set } from "firebase/database";
-import { createContext, useContext, useEffect, useState } from "react";
-const firebaseConfig = {
-  apiKey:import.meta.env.VITE_apiKey,
-  authDomain: import.meta.env.VITE_authDomain,
-  projectId: import.meta.env.VITE_projectId,
-  storageBucket: import.meta.env.VITE_storageBucket,
-  messagingSenderId: import.meta.env.VITE_messagingSenderId,
-  appId: import.meta.env.VITE_appId,
-  databaseURL:import.meta.env.VITE_databaseURL
-};
-const FirebaseApp=initializeApp(firebaseConfig);
-const database=getDatabase(FirebaseApp);
-const FirebaseAuth=getAuth(FirebaseApp);
-const FirebaseContext=createContext(null);
-
-
-// custom Hook
-export const useFirebase=()=>{
-   return useContext(FirebaseContext );
+  }
 }
+```
 
-export const FirebaseProvider=(props)=>{
-
-    const [name,setName]=useState("");
-
-    const signupUserWithEmailAndPassword=(email,password)=>{
-    return createUserWithEmailAndPassword(FirebaseAuth,email,password);
+#### Firestore Rules
+```javascript
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+  }
+}
+```
 
-    const putData=(key,data)=>{
+### 3. Password Requirements
+- Firebase requires passwords to be **at least 6 characters long**
+- Consider implementing additional client-side validation
 
-        set(ref(database,key),data);
-    }
-// get(child(ref(database),'grandfather')).then(snapshot=>console.log(snapshot.val()));
-    // get(child(ref(database),'grandfather/father')).then(snapshot=>console.log(snapshot.val()));
+### 4. Test Mode Warning
+⚠️ **Important:** Test mode allows unrestricted read/write access. Always configure proper security rules before deploying to production!
 
+---
 
-    useEffect(()=>{
-    onValue(ref(database,'grandfather/father/child'),(snapshot)=>setName(snapshot.val().name));
-    },[]);
-    return(
-        <FirebaseContext.Provider value={{signupUserWithEmailAndPassword,putData}}>
-            <h3>Name is :{name}</h3>
-           {props.children} 
-        </FirebaseContext.Provider>
-    )
-};
+## Key Differences: Realtime Database vs Firestore
+
+| Feature | Realtime Database | Firestore |
+|---------|-------------------|-----------|
+| **Data Structure** | JSON tree | Collections & Documents |
+| **Querying** | Limited | Advanced with compound queries |
+| **Scaling** | Regional | Automatic multi-region |
+| **Offline Support** | Basic | Advanced |
+| **Pricing** | Per GB stored | Per operation |
+| **Best For** | Simple data sync | Complex queries & structure |
+
+---
+
+## Common Use Cases
+
+### Realtime Database
+- Chat applications
+- Real-time collaboration
+- Live location tracking
+- Simple data structures
+- Used by Gaming Companies
+
+### Firestore
+- E-commerce platforms
+- Social media apps
+- Complex data relationships
+- Apps requiring advanced queries
+
+---
+
+## Additional Resources
+
+- [Firebase Documentation](https://firebase.google.com/docs)
+- [React Firebase Hooks](https://github.com/CSFrequency/react-firebase-hooks)
+- [Firebase Security Rules](https://firebase.google.com/docs/rules)
+- [Firebase Best Practices](https://firebase.google.com/docs/guides)
+
+---
+
+## Summary
+
+This guide covered:
+- ✅ Firebase project setup and configuration
+- ✅ Email/Password and Google authentication
+- ✅ Realtime Database operations (read/write/listen)
+- ✅ Cloud Firestore CRUD operations
+- ✅ Context API pattern for Firebase
+- ✅ Security best practices
+
+Firebase provides a powerful backend solution for React applications, enabling rapid development with authentication, databases, and real-time capabilities out of the box.

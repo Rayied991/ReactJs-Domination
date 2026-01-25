@@ -24,15 +24,17 @@ const App = () => {
     onAuthStateChanged(auth,(user)=>{
       if(user){
         // logged in
+        console.log("User logged in:", user); // Debug: check what's in user object
         setUser(user);
       }
       else{
         console.log("Logged out");
         setUser(null);
       }
-    })
+    });
   },[]);
 
+   // When user is NOT logged in, show SignUp and SignIn
   if(user==null){
   return (
     <div className="App">
@@ -45,18 +47,16 @@ const App = () => {
   )
   }
 
+   // When user IS logged in, show welcome message and logout button
     return (
     <div className="App">
       {/* <h1>Firebase + React</h1>
       <button onClick={putData}>put data</button> */}
       {/* <button onClick={signupUser}>Create User</button> */}
-      <h1>Hello {user.email}</h1>
-    <button onClick={()=> signOut(auth)}></button>
-      <Signin/>
+      <h1>Hello {user.email || user.displayName || "User"}</h1>
+      <button onClick={() => signOut(auth)}>LogOut</button>
     </div>
   )
-
-
 }
 
 export default App;

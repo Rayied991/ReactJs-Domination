@@ -2802,4 +2802,141 @@ function App() {
 
 export default App
 
-## Firebase Google Authentication
+## Firebase Google Authentication & User signed in or not fetch user
+
+signup.jsx:
+ 
+import { createUserWithEmailAndPassword, getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { getDatabase, ref, set } from "firebase/database";
+import { useState } from "react";
+import { app } from "../firebase/firebase";
+
+
+const auth=getAuth(app);
+const db = getDatabase(app);
+const googleProvider=new GoogleAuthProvider();
+
+const SignUp = () => {
+    const [email,setEmail]=useState("");
+    const [password,setPassword]=useState("");
+
+    const createUser=()=>{
+        createUserWithEmailAndPassword(auth,email,password).then((value)=>{
+           // Optionally store user data in Realtime Database
+           set(ref(db,"users/"+ value.user.uid),{
+            email:value.user.email,
+            createdAt: new Date().toISOString(),
+            provider: "email"
+           });
+           alert("success");
+        })
+        .catch(err=>console.log(err));
+    }
+
+    const signupWIthGoogle=()=>{
+      signInWithPopup(auth,googleProvider)
+      .then((result)=>{
+        // Signed-in user info
+        const user=result.user;
+
+         // Optionally store user data in Realtime Database
+         set(ref(db,"users/"+user.uid),{
+                    email: user.email,
+                    displayName: user.displayName,
+                    photoURL: user.photoURL,
+                    provider: 'google',
+                    createdAt: new Date().toISOString()
+         })
+         .then(() => console.log("User data saved to database"))
+                .catch(err => console.error("Error saving to database:", err));
+
+                console.log("Google sign-in successful");
+      })
+      .catch((error) => {
+                console.error("Error:", error.code, error.message);
+            });
+     
+    }
+  return (
+    <div className="signup-page">
+      <h1>SignUp Page</h1>
+        <label >Email:</label>
+        <input onChange={e=>setEmail(e.target.value)} value={email} type="email" required placeholder="Enter your email here" />
+        <label >Password:</label>
+        <input onChange={e=>setPassword(e.target.value)} value={password} type="password" required placeholder="Enter your password here" />
+       <br />
+       <button onClick={signupWIthGoogle}>Sign in With Google</button>
+        <button onClick={createUser}>Sign Up</button>
+    </div>
+  )
+}
+
+export default SignUp;
+
+app.jsx:
+/* eslint-disable no-unused-vars */
+import { createUserWithEmailAndPassword, getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { getDatabase, ref, set } from 'firebase/database';
+import { useEffect, useState } from 'react';
+import { app } from './firebase/firebase';
+import SignUp from './pages/SignUp';
+import Signin from './pages/Signin';
+
+const auth=getAuth(app);
+const db=getDatabase(app);
+const App = () => {
+  const [user,setUser]=useState(null);
+  const putData=()=>{
+    set(ref(db,'users/rayied'),{
+      id:1,
+      name:"rayied",
+      age:26
+    })
+  };
+  const signupUser=()=>{
+    createUserWithEmailAndPassword(auth,'raydev@gmail.com','123456').then(value=>console.log(value));
+  }
+  useEffect(()=>{
+    onAuthStateChanged(auth,(user)=>{
+      if(user){
+        // logged in
+        console.log("User logged in:", user); // Debug: check what's in user object
+        setUser(user);
+      }
+      else{
+        console.log("Logged out");
+        setUser(null);
+      }
+    });
+  },[]);
+
+   // When user is NOT logged in, show SignUp and SignIn
+  if(user==null){
+  return (
+    <div className="App">
+      {/* <h1>Firebase + React</h1>
+      <button onClick={putData}>put data</button> */}
+      {/* <button onClick={signupUser}>Create User</button> */}
+      <SignUp/>
+      <Signin/>
+    </div>
+  )
+  }
+
+   // When user IS logged in, show welcome message and logout button
+    return (
+    <div className="App">
+      {/* <h1>Firebase + React</h1>
+      <button onClick={putData}>put data</button> */}
+      {/* <button onClick={signupUser}>Create User</button> */}
+      <h1>Hello {user.email || user.displayName || "User"}</h1>
+      <button onClick={() => signOut(auth)}>LogOut</button>
+    </div>
+  )
+
+
+}
+
+export default App;
+
+## Getting started With Firebase Cloud Firestore

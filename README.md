@@ -3078,3 +3078,16 @@ This guide covered:
 - ✅ Security best practices
 
 Firebase provides a powerful backend solution for React applications, enabling rapid development with authentication, databases, and real-time capabilities out of the box.
+
+# ReactJS Optimization
+
+## Code Splitting
+Split bundle into different chunks.
+Bundler->webpack,browserify,rollup
+
+Bundle-c1-homepage
+Bundle-c2-contact page
+Bundle-c3-about page
+Bundle-c4-features page
+Bundle-c5-info page
+Bundle-c6-login page

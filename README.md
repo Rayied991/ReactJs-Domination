@@ -3081,6 +3081,9 @@ Firebase provides a powerful backend solution for React applications, enabling r
 
 # ReactJS Optimization
 
+![alt text](image-2.png)
+# Re-Rendering 
+
 ## Code Splitting
 Split bundle into different chunks.
 Bundler->webpack,browserify,rollup

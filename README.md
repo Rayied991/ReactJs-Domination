@@ -2288,113 +2288,6 @@ Redux Toolkit simplifies Redux development by:
 
 This makes it the recommended approach for all new Redux projects!
 
-#React With TypeScript
-
-Typescript is superset of JavaScript that allows you to define types for variables,function parameters & return values, enhancing code quality and catching errors  during development.
-
-
-
-main.tsx:
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import App from './App.tsx'
-import './index.css'
-import { TodosProvider } from './store/Todos.tsx'
-
-createRoot(document.getElementById('root')!).render(
-  <StrictMode>
-    <TodosProvider>
-    <App />
-    </TodosProvider>
-  </StrictMode>,
-)
-
-
-AddToDo.tsx:
-import { useState, type FormEvent } from "react";
-import { useTodos } from "../store/Todos";
-
-const AddToDo = () => {
-    const [todo,setTodo]=useState("");
-    const {handleAddToDo}=useTodos();
-
-    const handleFormSubmit=(e:FormEvent<HTMLElement>)=>{
-        e.preventDefault();
-        handleAddToDo(todo);
-        setTodo("");
-    }
-    
-  return (
-    <form onSubmit={handleFormSubmit}>
-        <input type="text" value={todo} onChange={(e)=>setTodo(e.target.value)} />
-        <button type="submit">Add</button>
-    </form>
-  )
-}
-
-export default AddToDo;
-know the type:
-![alt text](image-1.png)
-
-todos.tsx:
-import { createContext, useContext, useState, type ReactNode } from "react";
-// creating custom types
-export type TodosProviderProps={
-    // ReactNode is a generic type that covers a wide range of possible children types,
-    // including JSX elements, strings and other React components.
-    children: ReactNode;
-}
-
-export type Todo={
-    id:string;
-    task:string;
-    completed:boolean;
-    createdAt:Date;
-}
-export type TodosContext={
-    todos:Todo[];
-    handleAddToDo:(task:string)=>void;//call signature
-}
-export const TodosContext=createContext<TodosContext | null>(null);
-
-export const TodosProvider=({children}:TodosProviderProps)=>{
-    const [todos,setTodos]=useState<Todo[]>([]);
-    const handleAddToDo=(task:string)=>{
-        setTodos((prev)=>{
-            const newTodos:Todo[]=[
-                {
-                    id:Math.random().toString(),
-                    task:task,
-                    completed:false,
-                    createdAt:new Date()
-                
-                },
-                ...prev
-            ]
-
-            // console.log("My previous data:",prev);
-            // console.log("My new data:",newTodos);
-            return newTodos;
-        })
-        
-    }
-
-
-    return <TodosContext.Provider value={{todos,handleAddToDo}}>
-        {children}
-    </TodosContext.Provider>
-}
-
-
-
-// consumer
-export const useTodos=()=>{
-    const todosConsumer=useContext(TodosContext);
-    if(!todosConsumer){
-        throw new Error("useTodos used outside of Provider");
-    }
-    return  todosConsumer;
-}
 # Firebase with React - Complete Guide
 
 A comprehensive guide to integrating Firebase services (Authentication, Realtime Database, and Firestore) with React applications.
@@ -3079,6 +2972,421 @@ This guide covered:
 
 Firebase provides a powerful backend solution for React applications, enabling rapid development with authentication, databases, and real-time capabilities out of the box.
 
+
+
+# React with TypeScript - Todo Application Guide
+
+## Table of Contents
+- [Introduction](#introduction)
+- [TypeScript Basics](#typescript-basics)
+- [Project Structure](#project-structure)
+- [Type Definitions](#type-definitions)
+- [Context API Implementation](#context-api-implementation)
+- [Components Breakdown](#components-breakdown)
+- [Key Concepts](#key-concepts)
+
+---
+
+## Introduction
+
+This guide explains a Todo application built with React and TypeScript. TypeScript is a superset of JavaScript that adds static typing, helping catch errors during development and improving code quality.
+
+---
+
+## TypeScript Basics
+
+TypeScript allows you to define types for:
+- **Variables**: `const name: string = "John"`
+- **Function Parameters**: `function greet(name: string) {}`
+- **Return Values**: `function add(a: number, b: number): number {}`
+
+This enhances code quality and catches errors before runtime.
+
+---
+
+## Project Structure
+
+```
+src/
+├── main.tsx              # Application entry point
+├── App.tsx               # Main app component
+├── index.css             # Global styles
+├── store/
+│   └── Todos.tsx         # Context provider and types
+└── components/
+    ├── AddToDo.tsx       # Add todo form component
+    └── Todos.tsx         # Todo list component
+```
+
+---
+
+## Type Definitions
+
+### Todo Type
+```typescript
+export type Todo = {
+    id: string;
+    task: string;
+    completed: boolean;
+    createdAt: Date;
+}
+```
+
+**Explanation**: Defines the structure of a single todo item with four properties.
+
+### TodosProviderProps Type
+```typescript
+export type TodosProviderProps = {
+    children: ReactNode;
+}
+```
+
+**Explanation**: Defines props for the TodosProvider component. `ReactNode` is a generic type that covers JSX elements, strings, numbers, and other React components.
+
+### TodosContext Type
+```typescript
+export type TodosContext = {
+    todos: Todo[];
+    handleAddToDo: (task: string) => void;
+    toggleTodoAsCompleted: (id: string) => void;
+}
+```
+
+**Explanation**: Defines the shape of the context value with:
+- `todos`: Array of Todo items
+- `handleAddToDo`: Function that accepts a string (task) and returns void (call signature)
+- `toggleTodoAsCompleted`: Function that accepts an id string and returns void
+
+---
+
+## Context API Implementation
+
+### main.tsx - Application Entry Point
+
+```typescript
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import App from './App.tsx'
+import './index.css'
+import { TodosProvider } from './store/Todos.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <TodosProvider>
+      <App />
+    </TodosProvider>
+  </StrictMode>,
+)
+```
+
+**Explanation**:
+- Wraps the entire app with `TodosProvider` to make the todo context available everywhere
+- `StrictMode` enables additional development checks
+- The `!` after `getElementById('root')` is a TypeScript non-null assertion operator
+
+---
+
+### store/Todos.tsx - Context Provider
+
+#### Creating the Context
+
+```typescript
+export const TodosContext = createContext<TodosContext | null>(null);
+```
+
+**Explanation**: Creates a context with type `TodosContext | null`. Initially set to `null` because there's no default value.
+
+#### Provider Component
+
+```typescript
+export const TodosProvider = ({children}: TodosProviderProps) => {
+    const [todos, setTodos] = useState<Todo[]>([]);
+    
+    const handleAddToDo = (task: string) => {
+        setTodos((prev) => {
+            const newTodos: Todo[] = [
+                {
+                    id: Math.random().toString(),
+                    task: task,
+                    completed: false,
+                    createdAt: new Date()
+                },
+                ...prev
+            ]
+            return newTodos;
+        })
+    }
+    
+    const toggleTodoAsCompleted = (id: string) => {
+        setTodos((prev) => {
+            const newTodos = prev.map((todo) => {
+                if(todo.id === id) {
+                    return {...todo, completed: !todo.completed}
+                }
+                return todo;
+            })
+            return newTodos;
+        })
+    }
+    
+    return (
+        <TodosContext.Provider value={{todos, handleAddToDo, toggleTodoAsCompleted}}>
+            {children}
+        </TodosContext.Provider>
+    )
+}
+```
+
+**Explanation**:
+
+1. **State Management**: `useState<Todo[]>([])` - Creates state with explicit type `Todo[]` (array of todos)
+
+2. **handleAddToDo Function**:
+   - Accepts a `task` parameter of type `string`
+   - Creates a new todo object with a random ID, the task, completed status false, and current date
+   - Uses spread operator `...prev` to prepend the new todo to existing todos
+
+3. **toggleTodoAsCompleted Function**:
+   - Accepts an `id` parameter of type `string`
+   - Maps through todos to find matching id
+   - Toggles the `completed` property using spread operator and negation
+   - Returns unchanged todos for non-matching ids
+
+#### Custom Hook - useTodos
+
+```typescript
+export const useTodos = () => {
+    const todosConsumer = useContext(TodosContext);
+    if(!todosConsumer) {
+        throw new Error("useTodos used outside of Provider");
+    }
+    return todosConsumer;
+}
+```
+
+**Explanation**:
+- Custom hook to consume the TodosContext
+- Performs null check to ensure it's used within the provider
+- Throws error if used outside provider (development safety)
+- Returns the context value with proper typing
+
+---
+
+## Components Breakdown
+
+### AddToDo.tsx - Add Todo Form
+
+```typescript
+import { useState, type FormEvent } from "react";
+import { useTodos } from "../store/Todos";
+
+const AddToDo = () => {
+    const [todo, setTodo] = useState("");
+    const {handleAddToDo} = useTodos();
+
+    const handleFormSubmit = (e: FormEvent<HTMLElement>) => {
+        e.preventDefault();
+        handleAddToDo(todo);
+        setTodo("");
+    }
+    
+    return (
+        <form onSubmit={handleFormSubmit}>
+            <input 
+                type="text" 
+                value={todo} 
+                onChange={(e) => setTodo(e.target.value)} 
+            />
+            <button type="submit">Add</button>
+        </form>
+    )
+}
+
+export default AddToDo;
+```
+
+**Explanation**:
+
+1. **Local State**: `useState("")` manages the input field value
+
+2. **Context Consumer**: `useTodos()` hook provides access to `handleAddToDo` function
+
+3. **Form Submit Handler**:
+   - Type: `FormEvent<HTMLElement>` specifies the event type
+   - `e.preventDefault()` prevents page reload
+   - Calls `handleAddToDo` with current todo text
+   - Clears input field by resetting state to empty string
+
+4. **Controlled Input**: Value and onChange create a controlled component
+
+---
+
+### Todos.tsx - Todo List Component
+
+```typescript
+import { useTodos, type Todo } from "../store/Todos";
+
+const Todos = () => {
+    const {todos, toggleTodoAsCompleted, handleDeleteTodo} = useTodos();
+
+    const filterData = todos;
+    
+    return (
+        <ul>
+            {filterData.map((todo: Todo) => {
+                return (
+                    <li key={todo.id}>
+                        <input 
+                            type="checkbox"  
+                            id={`todo-${todo.id}`}
+                            checked={todo.completed}
+                            onChange={() => toggleTodoAsCompleted(todo.id)}
+                        />
+                        <label htmlFor={`todo-${todo.id}`}>
+                            {todo.task}
+                        </label>
+
+                        {todo.completed && (
+                            <button 
+                                type="button" 
+                                onClick={() => handleDeleteTodo(todo.id)}
+                            >
+                                Delete
+                            </button>
+                        )}
+                    </li>
+                )
+            })}
+        </ul>
+    )
+}
+
+export default Todos
+```
+
+**Explanation**:
+
+1. **Context Consumer**: Destructures `todos` and `toggleTodoAsCompleted` from context
+
+2. **Mapping Todos**: 
+   - `map((todo: Todo) => ...)` explicitly types each todo item
+   - `key={todo.id}` provides unique key for React's reconciliation
+
+3. **Checkbox Input**:
+   - `id` uses template literal for unique identifier
+   - `checked={todo.completed}` binds to todo's completed state
+   - `onChange` calls toggle function with todo's id
+
+4. **Label**: 
+   - `htmlFor` associates label with checkbox
+   - Displays the todo task text
+
+5. **Conditional Delete Button**:
+   - `{todo.completed && (...)}` only renders when todo is completed
+   - Uses logical AND operator for conditional rendering
+   - Calls `handleDeleteTodo` (note: this function needs to be added to context)
+
+---
+
+## Key Concepts
+
+### 1. Type Safety
+TypeScript catches errors like:
+```typescript
+// ❌ Error: Argument of type 'number' is not assignable to parameter of type 'string'
+handleAddToDo(123);
+
+// ✅ Correct
+handleAddToDo("Buy groceries");
+```
+
+### 2. Type Inference
+TypeScript can infer types automatically:
+```typescript
+const [todo, setTodo] = useState("");
+// TypeScript infers todo is type string
+```
+
+### 3. Call Signatures
+```typescript
+handleAddToDo: (task: string) => void
+```
+Defines a function that:
+- Accepts one parameter `task` of type `string`
+- Returns `void` (nothing)
+
+### 4. Spread Operator
+```typescript
+{...todo, completed: !todo.completed}
+```
+Creates a new object with all properties of `todo`, but overrides `completed`
+
+### 5. Non-null Assertion Operator (!)
+```typescript
+document.getElementById('root')!
+```
+Tells TypeScript "I'm certain this won't be null"
+
+### 6. Type Imports
+```typescript
+import { type FormEvent } from "react";
+```
+The `type` keyword explicitly imports only the type (not runtime code)
+
+---
+
+## Missing Implementation Note
+
+The `Todos.tsx` component references `handleDeleteTodo` which isn't implemented in the provided code. To complete the application, add this to the context:
+
+```typescript
+// In TodosContext type
+export type TodosContext = {
+    todos: Todo[];
+    handleAddToDo: (task: string) => void;
+    toggleTodoAsCompleted: (id: string) => void;
+    handleDeleteTodo: (id: string) => void; // Add this
+}
+
+// In TodosProvider component
+const handleDeleteTodo = (id: string) => {
+    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+}
+
+// In provider value
+return (
+    <TodosContext.Provider 
+        value={{todos, handleAddToDo, toggleTodoAsCompleted, handleDeleteTodo}}
+    >
+        {children}
+    </TodosContext.Provider>
+)
+```
+
+---
+
+## Benefits of This Architecture
+
+1. **Type Safety**: Catches bugs during development
+2. **Centralized State**: All todo logic in one place
+3. **Reusable Hook**: `useTodos()` can be used in any component
+4. **Scalable**: Easy to add new features
+5. **Maintainable**: Clear separation of concerns
+
+---
+
+## Summary
+
+This todo application demonstrates:
+- TypeScript's type system for safer React development
+- Context API for global state management
+- Custom hooks for cleaner code
+- Controlled components for forms
+- Functional updates for state management
+- Conditional rendering patterns
+
+The combination of React and TypeScript creates a robust, maintainable application with excellent developer experience and fewer runtime errors.
+<!-- 52:46 -->
 # ReactJS Optimization
 
 ![alt text](image-2.png)
